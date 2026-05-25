@@ -1,9 +1,8 @@
-src/**
-node_modules/**
-tsconfig.json
-.vscode/**
-*.vsix
-.gitignore
-renovate.json5
-out/**/*.map
-PUBLISHING.md
+**
+!out/extension.js
+!syntaxes/**
+!language-configuration.json
+!LICENSE
+!README.md
+!package.json
+!package-lock.json
