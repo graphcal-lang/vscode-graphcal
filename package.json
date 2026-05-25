@@ -14,9 +14,12 @@
   "publisher": "Graphcal",
   "main": "./out/extension.js",
   "scripts": {
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "package": "vsce package"
+    "check-types": "tsc --noEmit",
+    "build": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --target=node20",
+    "compile": "npm run check-types && npm run build -- --sourcemap",
+    "watch": "npm run build -- --sourcemap --watch",
+    "vscode:prepublish": "npm run check-types && npm run build -- --minify",
+    "package": "vsce package --no-dependencies"
   },
   "dependencies": {
     "vscode-languageclient": "^9.0.1"
@@ -24,6 +27,7 @@
   "devDependencies": {
     "@types/vscode": "1.120.0",
     "@vscode/vsce": "3.9.1",
+    "esbuild": "^0.28.0",
     "typescript": "6.0.3"
   },
   "contributes": {

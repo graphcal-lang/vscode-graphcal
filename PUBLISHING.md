@@ -7,6 +7,10 @@
    npm run compile
    ```
 
+   The extension is bundled with esbuild. Runtime dependencies such as
+   `vscode-languageclient` are included in `out/extension.js`; `node_modules`
+   is intentionally not shipped in the VSIX.
+
 2. Make sure the `publisher` field in `package.json` matches the Visual Studio Marketplace publisher account.
 
 3. Check the versioning constraint for VS Code Marketplace pre-releases.
@@ -31,20 +35,32 @@
    npx vsce verify-pat Graphcal
    ```
 
-6. Package and inspect the VSIX contents as a pre-release:
+6. Package the VSIX as a pre-release:
 
    ```sh
-   npx vsce package --pre-release
+   npm run package -- --pre-release
    ```
 
-7. Publish the packaged VSIX as a pre-release:
+   This runs `vscode:prepublish`, which typechecks and creates a production
+   esbuild bundle, then invokes `vsce package --no-dependencies`.
+
+7. Inspect the packaged contents before publishing:
 
    ```sh
-   npx vsce publish --pre-release --packagePath graphcal-0.1.0.vsix
+   npx vsce ls --no-dependencies
+   ```
+
+   The VSIX should include `out/extension.js` and should not include
+   `node_modules` or `src`.
+
+8. Publish the packaged VSIX as a pre-release:
+
+   ```sh
+   npx vsce publish --no-dependencies --pre-release --packagePath graphcal-0.1.0.vsix
    ```
 
    Alternatively, publish directly from the working tree as a pre-release:
 
    ```sh
-   npx vsce publish --pre-release
+   npx vsce publish --no-dependencies --pre-release
    ```
