@@ -32,6 +32,7 @@
     { "include": "#generic-params" },
     { "include": "#return-type" },
     { "include": "#type-annotation" },
+    { "include": "#match-constructor-pattern" },
     { "include": "#fn-call" },
     { "include": "#inline-dag-output-projection" },
     { "include": "#graph-ref" },
@@ -492,6 +493,14 @@
           "name": "punctuation.separator.comma.graphcal"
         }
       ]
+    },
+
+    "match-constructor-pattern": {
+      "comment": "Type-constructor match patterns: Impulsive(delta_v: _) => ...",
+      "match": "\\b([A-Z][a-zA-Z0-9_]*)\\s*(?=\\([^)]*\\)\\s*=>)",
+      "captures": {
+        "1": { "name": "entity.name.type.constructor.graphcal" }
+      }
     },
 
     "fn-call": {
