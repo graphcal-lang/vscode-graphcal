@@ -1,7 +1,7 @@
 {
   "name": "graphcal",
   "displayName": "Graphcal",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Graphcal language support: syntax highlighting and Language Server Protocol (LSP) integration",
   "categories": [
     "Programming Languages"
