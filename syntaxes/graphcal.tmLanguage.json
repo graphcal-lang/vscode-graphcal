@@ -31,6 +31,7 @@
     { "include": "#control-keywords" },
     { "include": "#generic-params" },
     { "include": "#return-type" },
+    { "include": "#conversion-target" },
     { "include": "#type-annotation" },
     { "include": "#match-index-label-pattern" },
     { "include": "#match-constructor-pattern" },
@@ -41,6 +42,7 @@
     { "include": "#qualified-variant" },
     { "include": "#booleans" },
     { "include": "#wildcard" },
+    { "include": "#unit-literal" },
     { "include": "#numbers" },
     { "include": "#builtin-types" },
     { "include": "#upper-constant" },
@@ -493,6 +495,41 @@
           "match": ",",
           "name": "punctuation.separator.comma.graphcal"
         }
+      ]
+    },
+
+    "conversion-target": {
+      "comment": "Conversion target after '->' in expressions: @a -> km, @a -> u.mile, @a -> m/s^2, @x -> 1/min. A unit reference is a bare name or `alias.unit` through a module-import alias (graphcal#821). Dag return types after ') ->' are handled by #return-type, which precedes this rule.",
+      "match": "(->)\\s*((?:1\\s*/\\s*)?[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?(?:\\s*[*/]\\s*[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?)*)",
+      "captures": {
+        "1": { "name": "keyword.operator.arrow.graphcal" },
+        "2": { "patterns": [{ "include": "#unit-expression-segments" }] }
+      }
+    },
+
+    "unit-literal": {
+      "comment": "Unit literal: a number juxtaposed with a unit expression — 2.0 km, 9.81 m/s^2, 2.0 u.mile. A single dotted qualifier names a module-import alias (graphcal#821).",
+      "match": "\\b([0-9][0-9_]*(?:\\.[0-9][0-9_]*)?(?:[eE][+-]?[0-9]+)?)\\s+(?!(?:if|else|match|for|in|as|step|true|false)\\b)([a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?(?:\\s*[*/]\\s*[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?)*)",
+      "captures": {
+        "1": { "name": "constant.numeric.graphcal" },
+        "2": { "patterns": [{ "include": "#unit-expression-segments" }] }
+      }
+    },
+
+    "unit-expression-segments": {
+      "comment": "Segments inside a matched unit expression. `alias.unit` highlights the qualifier as a module alias and the leaf as a unit; bare names are units.",
+      "patterns": [
+        {
+          "match": "([a-zA-Z][a-zA-Z0-9_]*)(\\.)([a-zA-Z][a-zA-Z0-9_]*)",
+          "captures": {
+            "1": { "name": "entity.name.namespace.graphcal" },
+            "2": { "name": "punctuation.accessor.dot.graphcal" },
+            "3": { "name": "entity.name.type.unit.graphcal" }
+          }
+        },
+        { "match": "[a-zA-Z][a-zA-Z0-9_]*", "name": "entity.name.type.unit.graphcal" },
+        { "match": "-?[0-9]+(?:/[0-9]+)?", "name": "constant.numeric.graphcal" },
+        { "match": "[*/^]", "name": "keyword.operator.arithmetic.graphcal" }
       ]
     },
 
