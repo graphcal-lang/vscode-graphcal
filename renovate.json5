@@ -10,5 +10,14 @@
       matchUpdateTypes: ["lockFileMaintenance"],
       minimumReleaseAge: null,
     },
+    {
+      description: "Update VS Code engine and @types/vscode together",
+      matchManagers: ["npm"],
+      matchDepNames: ["vscode", "@types/vscode"],
+      groupName: "VS Code API",
+      groupSlug: "vscode-api",
+      rangeStrategy: "bump",
+      minimumGroupSize: 2,
+    },
   ],
 }
