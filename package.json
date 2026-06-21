@@ -98,7 +98,7 @@
     "onLanguage:graphcal"
   ],
   "engines": {
-    "vscode": "^1.120.0"
+    "vscode": "^1.124.2"
   },
   "packageManager": "npm@11.17.0"
 }
