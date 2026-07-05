@@ -25,6 +25,7 @@
     { "include": "#layer-declaration" },
     { "include": "#dag-declaration" },
     { "include": "#include-declaration" },
+    { "include": "#plugin-import-declaration" },
     { "include": "#import-declaration" },
     { "include": "#for-binding" },
     { "include": "#as-keyword" },
@@ -243,6 +244,88 @@
         "2": { "name": "keyword.declaration.layer.graphcal" },
         "3": { "name": "variable.other.graphcal" }
       }
+    },
+
+    "plugin-import-declaration": {
+      "comment": "Plugin import with extern function declarations (graphcal#943): import plugin \"path\" as alias { fn name<D1, D2>(p: Type, ...) -> Type; ... }. `plugin` is a contextual keyword — this rule engages only when `import plugin` is followed by a string literal, so `import plugin.tools as t;` stays an ordinary module import. The block ends at `}` with no trailing `;`. Must precede #import-declaration in the top-level pattern list.",
+      "begin": "\\b(import)\\s+(plugin)\\b(?=\\s*\")",
+      "end": "\\}",
+      "beginCaptures": {
+        "1": { "name": "keyword.declaration.import.graphcal" },
+        "2": { "name": "keyword.other.plugin.graphcal" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.brackets.curly.graphcal" }
+      },
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#strings" },
+        {
+          "comment": "Plugin alias: import plugin \"…\" as fluids",
+          "match": "\\b(as)\\s+([a-zA-Z][a-zA-Z0-9_]*)",
+          "captures": {
+            "1": { "name": "keyword.operator.as.graphcal" },
+            "2": { "name": "entity.name.namespace.graphcal" }
+          }
+        },
+        { "include": "#extern-fn-declaration" },
+        {
+          "match": "\\{",
+          "name": "punctuation.brackets.curly.graphcal"
+        }
+      ]
+    },
+
+    "extern-fn-declaration": {
+      "comment": "Extern function declaration inside an import plugin block: fn density(p: Pressure, t: Temperature) -> Density; fn geometric_mean<D1, D2>(x: D1, y: D2) -> D1^(1/2) * D2^(1/2);",
+      "begin": "\\b(fn)\\s+([a-zA-Z][a-zA-Z0-9_]*)",
+      "end": ";",
+      "beginCaptures": {
+        "1": { "name": "keyword.declaration.function.graphcal" },
+        "2": { "name": "entity.name.function.graphcal" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.terminator.graphcal" }
+      },
+      "patterns": [
+        { "include": "#comments" },
+        {
+          "comment": "Dimension-variable binders: <D>, <D1, D2>",
+          "begin": "<",
+          "end": ">",
+          "beginCaptures": {
+            "0": { "name": "punctuation.brackets.angle.graphcal" }
+          },
+          "endCaptures": {
+            "0": { "name": "punctuation.brackets.angle.graphcal" }
+          },
+          "patterns": [
+            {
+              "match": "\\b[A-Za-z][a-zA-Z0-9_]*\\b",
+              "name": "entity.name.type.graphcal"
+            },
+            {
+              "match": ",",
+              "name": "punctuation.separator.comma.graphcal"
+            }
+          ]
+        },
+        { "include": "#return-type" },
+        {
+          "comment": "Parameter name before its type annotation: (p: Pressure, ...)",
+          "match": "\\b([a-zA-Z][a-zA-Z0-9_]*)\\b(?=\\s*:)",
+          "name": "variable.parameter.graphcal"
+        },
+        { "include": "#type-annotation" },
+        {
+          "match": "[()]",
+          "name": "punctuation.brackets.round.graphcal"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.comma.graphcal"
+        }
+      ]
     },
 
     "import-declaration": {
@@ -475,7 +558,7 @@
     },
 
     "return-type": {
-      "comment": "Return type after ') ->': -> D, -> Velocity, -> TransferResult",
+      "comment": "Return type after ') ->': -> D, -> Velocity, -> D^-1, -> D1^(1/2) * D2^(1/2). Dimension monomials over dim variables use rational exponents and cross-variable products (graphcal#943).",
       "begin": "(?<=\\))\\s*(->)\\s*(?=[A-Za-z])",
       "end": "(?=[=;{])",
       "beginCaptures": {
@@ -486,6 +569,19 @@
         {
           "match": "\\b([A-Z][a-zA-Z0-9_]*)\\b",
           "name": "entity.name.type.graphcal"
+        },
+        {
+          "comment": "Integer or rational exponent value: 2, -1, 1/2, -1/2",
+          "match": "-?[0-9]+(?:\\s*/\\s*[0-9]+)?",
+          "name": "constant.numeric.graphcal"
+        },
+        {
+          "match": "[*/^]",
+          "name": "keyword.operator.arithmetic.graphcal"
+        },
+        {
+          "match": "[()]",
+          "name": "punctuation.brackets.round.graphcal"
         },
         {
           "match": "[\\[\\]]",
