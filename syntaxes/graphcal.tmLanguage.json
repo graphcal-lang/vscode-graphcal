@@ -11,8 +11,8 @@
     { "include": "#dimension-declaration" },
     { "include": "#base-unit-declaration" },
     { "include": "#unit-declaration" },
+    { "include": "#range-index-declaration" },
     { "include": "#index-declaration" },
-    { "include": "#linspace-keyword" },
     { "include": "#param-declaration" },
     { "include": "#const-node-declaration" },
     { "include": "#const-unit-declaration" },
@@ -36,6 +36,8 @@
     { "include": "#type-annotation" },
     { "include": "#match-index-label-pattern" },
     { "include": "#match-constructor-pattern" },
+    { "include": "#recurrence-keyword" },
+    { "include": "#generic-call-application" },
     { "include": "#fn-call" },
     { "include": "#inline-dag-output-projection" },
     { "include": "#graph-ref" },
@@ -70,11 +72,34 @@
     },
 
     "type-declaration": {
-      "match": "(?:\\b(pub(?:\\s*\\(\\s*bind\\s*\\))?)\\s+)?\\b(type)\\s+([a-zA-Z][a-zA-Z0-9_]*)",
-      "captures": {
+      "comment": "A required type ends with ';'; a body contains bare or parenthesized constructors. Constructor payload braces are not a supported alias.",
+      "begin": "(?:\\b(pub(?:\\s*\\(\\s*bind\\s*\\))?)\\s+)?\\b(type)\\s+([a-zA-Z][a-zA-Z0-9_]*)",
+      "end": "(;)|(\\})",
+      "beginCaptures": {
         "1": { "name": "keyword.other.pub.graphcal" },
         "2": { "name": "keyword.declaration.type.graphcal" },
         "3": { "name": "entity.name.type.graphcal" }
+      },
+      "endCaptures": {
+        "1": { "name": "punctuation.terminator.graphcal" },
+        "2": { "name": "punctuation.brackets.curly.graphcal" }
+      },
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#generic-params" },
+        { "include": "#constructor-declaration" },
+        { "include": "#type-annotation" },
+        { "include": "#builtin-types" },
+        { "include": "#pascal-type" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "constructor-declaration": {
+      "comment": "Constructor declaration inside a type body: Ctor(...), Unit,",
+      "match": "\\b([a-zA-Z][a-zA-Z0-9_]*)\\b(?=\\s*(?:\\(|,|\\}))",
+      "captures": {
+        "1": { "name": "entity.name.type.constructor.graphcal" }
       }
     },
 
@@ -116,18 +141,51 @@
       }
     },
 
+    "range-index-declaration": {
+      "begin": "(?:\\b(pub(?:\\s*\\(\\s*bind\\s*\\))?)\\s+)?\\b(index)\\s+([a-zA-Z][a-zA-Z0-9_]*)\\s*=\\s*(linspace)\\s*(\\()",
+      "beginCaptures": {
+        "1": { "name": "keyword.other.pub.graphcal" },
+        "2": { "name": "keyword.declaration.index.graphcal" },
+        "3": { "name": "entity.name.type.graphcal" },
+        "4": { "name": "keyword.other.linspace.graphcal" },
+        "5": { "name": "punctuation.brackets.round.graphcal" }
+      },
+      "end": "(\\))",
+      "endCaptures": {
+        "1": { "name": "punctuation.brackets.round.graphcal" }
+      },
+      "patterns": [
+        {
+          "match": "\\b(step)\\b(?=\\s*:)",
+          "name": "keyword.other.step.graphcal"
+        },
+        { "include": "#range-index-parentheses" },
+        { "include": "$self" }
+      ]
+    },
+
+    "range-index-parentheses": {
+      "begin": "(\\()",
+      "beginCaptures": {
+        "1": { "name": "punctuation.brackets.round.graphcal" }
+      },
+      "end": "(\\))",
+      "endCaptures": {
+        "1": { "name": "punctuation.brackets.round.graphcal" }
+      },
+      "patterns": [
+        { "include": "#range-index-parentheses" },
+        { "include": "$self" }
+      ]
+    },
+
     "index-declaration": {
-      "match": "(?:\\b(pub(?:\\s*\\(\\s*bind\\s*\\))?)\\s+)?\\b(index)\\s+([A-Z][a-zA-Z0-9_]*)",
+      "match": "(?:\\b(pub(?:\\s*\\(\\s*bind\\s*\\))?)\\s+)?\\b(index)\\s+([a-zA-Z][a-zA-Z0-9_]*)",
       "captures": {
         "1": { "name": "keyword.other.pub.graphcal" },
         "2": { "name": "keyword.declaration.index.graphcal" },
         "3": { "name": "entity.name.type.graphcal" }
       }
-    },
-
-    "linspace-keyword": {
-      "match": "\\b(linspace)\\b",
-      "name": "keyword.other.linspace.graphcal"
     },
 
     "param-declaration": {
@@ -507,12 +565,18 @@
     },
 
     "control-keywords": {
-      "match": "\\b(if|else|for|match|table|scan|unfold|step|range)\\b",
+      "match": "\\b(if|else|for|match|table|range)\\b",
       "name": "keyword.control.graphcal"
     },
 
+    "recurrence-keyword": {
+      "comment": "Bare scan( and unfold( commit to recurrence syntax; qualified calls and other uses are identifiers.",
+      "match": "(?<!\\.)\\b(scan|unfold)\\b(?=\\s*\\()",
+      "name": "support.function.builtin.graphcal"
+    },
+
     "generic-params": {
-      "comment": "Generic parameters: <D: Dim>, <D: Dim, I: Index>",
+      "comment": "Sort-aware generic parameters and defaults: <D: Dim, I: Index, N: Nat = 3, F: Type = Marker>",
       "begin": "<(?=[A-Z]\\w*\\s*:)",
       "end": ">",
       "beginCaptures": {
@@ -522,6 +586,7 @@
         "0": { "name": "punctuation.brackets.angle.graphcal" }
       },
       "patterns": [
+        { "include": "#generic-arguments" },
         { "include": "#builtin-types" },
         {
           "match": "\\b([A-Z][a-zA-Z0-9_]*)\\s*(:)",
@@ -531,8 +596,81 @@
           }
         },
         {
+          "match": "=",
+          "name": "keyword.operator.assignment.graphcal"
+        },
+        {
+          "match": "[-+*/^]",
+          "name": "keyword.operator.arithmetic.graphcal"
+        },
+        { "include": "#numbers" },
+        {
+          "match": "\\b[A-Za-z][a-zA-Z0-9_]*\\b",
+          "name": "entity.name.type.graphcal"
+        },
+        {
           "match": ",",
           "name": "punctuation.separator.comma.graphcal"
+        }
+      ]
+    },
+
+    "generic-call-application": {
+      "comment": "A constructor or parsed function call with sort-aware generic arguments, such as Fixed<3>(...) or module.Matrix<M * N + 1>(...). Functions currently reject non-empty generic lists semantically.",
+      "begin": "\\b([a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*)\\s*(<)(?=[^\\n]*>\\s*\\()",
+      "end": "(>)",
+      "beginCaptures": {
+        "1": { "name": "entity.name.function.graphcal" },
+        "2": { "name": "punctuation.brackets.angle.graphcal" }
+      },
+      "endCaptures": {
+        "1": { "name": "punctuation.brackets.angle.graphcal" }
+      },
+      "patterns": [
+        { "include": "#generic-argument-contents" }
+      ]
+    },
+
+    "generic-arguments": {
+      "comment": "Generic arguments shared by type and constructor applications; semantic resolution sorts each as Dim, Index, Nat, or Type.",
+      "begin": "(<)",
+      "end": "(>)",
+      "beginCaptures": {
+        "1": { "name": "punctuation.brackets.angle.graphcal" }
+      },
+      "endCaptures": {
+        "1": { "name": "punctuation.brackets.angle.graphcal" }
+      },
+      "patterns": [
+        { "include": "#generic-argument-contents" }
+      ]
+    },
+
+    "generic-argument-contents": {
+      "patterns": [
+        { "include": "#generic-arguments" },
+        { "include": "#builtin-types" },
+        { "include": "#type-constraints" },
+        { "include": "#numbers" },
+        {
+          "match": "\\b[A-Za-z][a-zA-Z0-9_]*\\b",
+          "name": "entity.name.type.graphcal"
+        },
+        {
+          "match": "[-+*/^]",
+          "name": "keyword.operator.arithmetic.graphcal"
+        },
+        {
+          "match": "[\\[\\]()]",
+          "name": "punctuation.brackets.graphcal"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.comma.graphcal"
+        },
+        {
+          "match": "\\.",
+          "name": "punctuation.accessor.dot.graphcal"
         }
       ]
     },
@@ -585,7 +723,7 @@
 
     "unit-literal": {
       "comment": "Unit literal: a number juxtaposed with a unit expression — 2.0 km, 9.81 m/s^2, 2.0 u.mile. A single dotted qualifier names a module-import alias (graphcal#821).",
-      "match": "\\b([0-9][0-9_]*(?:\\.[0-9][0-9_]*)?(?:[eE][+-]?[0-9]+)?)\\s+(?!(?:if|else|match|for|in|as|step|true|false)\\b)([a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?(?:\\s*[*/]\\s*[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?)*)",
+      "match": "\\b([0-9][0-9_]*(?:\\.[0-9][0-9_]*)?(?:[eE][+-]?[0-9]+)?)\\s+(?!(?:if|else|match|for|in|as|true|false)\\b)([a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?(?:\\s*[*/]\\s*[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?)*)",
       "captures": {
         "1": { "name": "constant.numeric.graphcal" },
         "2": { "patterns": [{ "include": "#unit-expression-segments" }] }
@@ -626,7 +764,7 @@
     },
 
     "fn-call": {
-      "comment": "Function and constructor calls: sqrt(...), eye<3>(), TransferResult(...), module.Pick(...), etc.",
+      "comment": "Non-generic function and constructor calls: sqrt(...), TransferResult(...), module.Pick(...), etc. Generic calls are handled by #generic-call-application.",
       "match": "\\b([a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*)\\s*(?=(<[^>]*>)?\\s*\\()",
       "captures": {
         "1": { "name": "entity.name.function.graphcal" }
@@ -641,6 +779,7 @@
         "1": { "name": "punctuation.separator.colon.graphcal" }
       },
       "patterns": [
+        { "include": "#generic-arguments" },
         { "include": "#builtin-types" },
         { "include": "#type-constraints" },
         {
@@ -656,7 +795,7 @@
           "name": "punctuation.separator.comma.graphcal"
         },
         {
-          "match": "[*/^]",
+          "match": "[-+*/^]",
           "name": "keyword.operator.arithmetic.graphcal"
         },
         { "include": "#numbers" }
@@ -723,7 +862,7 @@
     },
 
     "qualified-variant": {
-      "comment": "Qualified variant/path: Maneuver.Departure or module.Maneuver.Departure",
+      "comment": "Qualified variant/path used by maps, table slices, and heterogeneous headers: Maneuver.Departure or module.Maneuver.Departure. Ordinary table row/column labels stay bare.",
       "match": "\\b([a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*)(\\.)([A-Z][a-zA-Z0-9_]*)\\b",
       "captures": {
         "1": { "name": "entity.name.type.graphcal" },
@@ -748,7 +887,7 @@
     },
 
     "builtin-types": {
-      "match": "\\b(Dimensionless|Bool|Int|Datetime|Dim|Index|Nat)\\b",
+      "match": "\\b(Dimensionless|Bool|Int|Datetime|Dim|Index|Nat|Type)\\b",
       "name": "support.type.graphcal"
     },
 
