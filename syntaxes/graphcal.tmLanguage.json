@@ -5,13 +5,14 @@
   "patterns": [
     { "include": "#comments" },
     { "include": "#strings" },
+    { "include": "#finite-position" },
     { "include": "#attribute" },
     { "include": "#type-declaration" },
     { "include": "#base-dimension-declaration" },
     { "include": "#dimension-declaration" },
     { "include": "#base-unit-declaration" },
     { "include": "#unit-declaration" },
-    { "include": "#range-index-declaration" },
+    { "include": "#coordinate-index-declaration" },
     { "include": "#index-declaration" },
     { "include": "#param-declaration" },
     { "include": "#const-node-declaration" },
@@ -28,6 +29,7 @@
     { "include": "#plugin-import-declaration" },
     { "include": "#import-declaration" },
     { "include": "#for-binding" },
+    { "include": "#table-index-list" },
     { "include": "#as-keyword" },
     { "include": "#control-keywords" },
     { "include": "#generic-params" },
@@ -141,13 +143,14 @@
       }
     },
 
-    "range-index-declaration": {
-      "begin": "(?:\\b(pub(?:\\s*\\(\\s*bind\\s*\\))?)\\s+)?\\b(index)\\s+([a-zA-Z][a-zA-Z0-9_]*)\\s*=\\s*(linspace)\\s*(\\()",
+    "coordinate-index-declaration": {
+      "comment": "Exact-step range and exact-count linspace declarations.",
+      "begin": "(?:\\b(pub(?:\\s*\\(\\s*bind\\s*\\))?)\\s+)?\\b(index)\\s+([a-zA-Z][a-zA-Z0-9_]*)\\s*=\\s*(range|linspace)\\s*(\\()",
       "beginCaptures": {
         "1": { "name": "keyword.other.pub.graphcal" },
         "2": { "name": "keyword.declaration.index.graphcal" },
         "3": { "name": "entity.name.type.graphcal" },
-        "4": { "name": "keyword.other.linspace.graphcal" },
+        "4": { "name": "keyword.other.coordinate-constructor.graphcal" },
         "5": { "name": "punctuation.brackets.round.graphcal" }
       },
       "end": "(\\))",
@@ -156,15 +159,15 @@
       },
       "patterns": [
         {
-          "match": "\\b(step)\\b(?=\\s*:)",
-          "name": "keyword.other.step.graphcal"
+          "match": "\\b(step|points)\\b(?=\\s*:)",
+          "name": "keyword.other.coordinate-spacing.graphcal"
         },
-        { "include": "#range-index-parentheses" },
+        { "include": "#coordinate-index-parentheses" },
         { "include": "$self" }
       ]
     },
 
-    "range-index-parentheses": {
+    "coordinate-index-parentheses": {
       "begin": "(\\()",
       "beginCaptures": {
         "1": { "name": "punctuation.brackets.round.graphcal" }
@@ -174,7 +177,7 @@
         "1": { "name": "punctuation.brackets.round.graphcal" }
       },
       "patterns": [
-        { "include": "#range-index-parentheses" },
+        { "include": "#coordinate-index-parentheses" },
         { "include": "$self" }
       ]
     },
@@ -226,8 +229,17 @@
       }
     },
 
+    "finite-position": {
+      "comment": "Positional #N key for a structural Fin axis.",
+      "match": "(#)([0-9][0-9_]*)",
+      "captures": {
+        "1": { "name": "punctuation.definition.finite-position.graphcal" },
+        "2": { "name": "constant.numeric.graphcal" }
+      }
+    },
+
     "attribute": {
-      "comment": "Attribute: #[name] or #[name(arg1, arg2, Index.Variant, (A.X, B.Y))]",
+      "comment": "Attribute: #[name] or #[name(arg1, Index.Variant, #2, (A.X, #1))]",
       "begin": "(#)(\\[)",
       "end": "(\\])",
       "beginCaptures": {
@@ -238,6 +250,7 @@
         "1": { "name": "punctuation.definition.attribute.graphcal" }
       },
       "patterns": [
+        { "include": "#finite-position" },
         {
           "match": "\\b([a-zA-Z][a-zA-Z0-9_]*)\\b",
           "name": "entity.other.attribute-name.graphcal"
@@ -527,7 +540,7 @@
     },
 
     "for-binding": {
-      "comment": "for m: Maneuver, i: range(3), j: range(N) — highlight all bindings",
+      "comment": "for m: Maneuver, i: Fin(3), j: Fin(N + 1) — highlight all bindings",
       "begin": "\\b(for)\\b",
       "end": "(?=\\{)",
       "beginCaptures": {
@@ -535,22 +548,24 @@
       },
       "patterns": [
         {
+          "comment": "Structural finite binding: var: Fin(N + 1)",
+          "match": "\\b([a-zA-Z][a-zA-Z0-9_]*)\\s*(:)\\s*(Fin)\\s*(\\()([^()]*)?(\\))",
+          "captures": {
+            "1": { "name": "variable.other.graphcal" },
+            "2": { "name": "punctuation.separator.colon.graphcal" },
+            "3": { "name": "keyword.other.finite-index.graphcal" },
+            "4": { "name": "punctuation.brackets.round.graphcal" },
+            "5": { "name": "meta.type-level.nat.graphcal" },
+            "6": { "name": "punctuation.brackets.round.graphcal" }
+          }
+        },
+        {
           "comment": "Named index binding: var: IndexName or var: module.IndexName",
           "match": "\\b([a-zA-Z][a-zA-Z0-9_]*)\\s*(:)\\s*([a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*)",
           "captures": {
             "1": { "name": "variable.other.graphcal" },
             "2": { "name": "punctuation.separator.colon.graphcal" },
             "3": { "name": "entity.name.type.graphcal" }
-          }
-        },
-        {
-          "comment": "Range binding: var: range(N) or var: range(3)",
-          "match": "\\b([a-zA-Z][a-zA-Z0-9_]*)\\s*(:)\\s*(range)\\s*\\(\\s*([a-zA-Z0-9_]+)\\s*\\)",
-          "captures": {
-            "1": { "name": "variable.other.graphcal" },
-            "2": { "name": "punctuation.separator.colon.graphcal" },
-            "3": { "name": "support.function.graphcal" },
-            "4": { "name": "entity.name.type.graphcal" }
           }
         },
         {
@@ -564,8 +579,42 @@
       ]
     },
 
+    "table-index-list": {
+      "comment": "Typed axes in table[Named, module.Axis, Fin(3)].",
+      "begin": "\\b(table)\\s*(\\[)",
+      "end": "(\\])",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.graphcal" },
+        "2": { "name": "punctuation.brackets.square.graphcal" }
+      },
+      "endCaptures": {
+        "1": { "name": "punctuation.brackets.square.graphcal" }
+      },
+      "patterns": [
+        {
+          "match": "\\b(Fin)\\b(?=\\s*\\()",
+          "captures": {
+            "1": { "name": "keyword.other.finite-index.graphcal" }
+          }
+        },
+        { "include": "#numbers" },
+        {
+          "match": "\\b[a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*\\b",
+          "name": "entity.name.type.graphcal"
+        },
+        {
+          "match": "[-+*]",
+          "name": "keyword.operator.arithmetic.graphcal"
+        },
+        {
+          "match": "[(),]",
+          "name": "punctuation.separator.graphcal"
+        }
+      ]
+    },
+
     "control-keywords": {
-      "match": "\\b(if|else|for|match|table|range)\\b",
+      "match": "\\b(if|else|for|match|table)\\b",
       "name": "keyword.control.graphcal"
     },
 
@@ -649,6 +698,12 @@
     "generic-argument-contents": {
       "patterns": [
         { "include": "#generic-arguments" },
+        {
+          "match": "\\b(Fin)\\b(?=\\s*\\()",
+          "captures": {
+            "1": { "name": "keyword.other.finite-index.graphcal" }
+          }
+        },
         { "include": "#builtin-types" },
         { "include": "#type-constraints" },
         { "include": "#numbers" },
@@ -780,6 +835,12 @@
       },
       "patterns": [
         { "include": "#generic-arguments" },
+        {
+          "match": "\\b(Fin)\\b(?=\\s*\\()",
+          "captures": {
+            "1": { "name": "keyword.other.finite-index.graphcal" }
+          }
+        },
         { "include": "#builtin-types" },
         { "include": "#type-constraints" },
         {
