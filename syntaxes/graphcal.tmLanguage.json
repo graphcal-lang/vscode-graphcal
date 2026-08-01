@@ -381,7 +381,7 @@
     },
 
     "import-declaration": {
-      "comment": "Import: import nasa.rocket; / import nasa.rocket as r; / import nasa.rocket.{type X, Y as Z};",
+      "comment": "Import: import nasa.rocket; / import nasa.rocket as r; / import nasa.rocket.{type X, dim D, unit u, index I, Y as Z};",
       "begin": "(?:\\b(pub(?:\\s*\\(\\s*bind\\s*\\))?)\\s+)?\\b(import)\\b",
       "end": ";",
       "beginCaptures": {
@@ -495,9 +495,11 @@
           "name": "keyword.other.pub.graphcal"
         },
         {
-          "comment": "Type namespace marker: { type Name }",
-          "match": "\\b(type)\\b",
-          "name": "keyword.declaration.type.graphcal"
+          "comment": "Explicit non-term import category markers",
+          "match": "\\b(type|dim|unit|index)\\b",
+          "captures": {
+            "1": { "name": "keyword.declaration.import-category.graphcal" }
+          }
         },
         {
           "match": "\\b(as)\\b",
