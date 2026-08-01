@@ -39,6 +39,7 @@
     { "include": "#match-index-label-pattern" },
     { "include": "#match-constructor-pattern" },
     { "include": "#recurrence-keyword" },
+    { "include": "#key-former-keyword" },
     { "include": "#generic-call-application" },
     { "include": "#fn-call" },
     { "include": "#inline-dag-output-projection" },
@@ -624,6 +625,12 @@
       "name": "support.function.builtin.graphcal"
     },
 
+    "key-former-keyword": {
+      "comment": "Bare key(, fin_key(, floor_key(, ceil_key(, and nearest_key( commit to key-former syntax; qualified calls and other uses are identifiers.",
+      "match": "(?<!\\.)\\b(key|fin_key|floor_key|ceil_key|nearest_key)\\b(?=\\s*\\()",
+      "name": "support.function.builtin.graphcal"
+    },
+
     "generic-params": {
       "comment": "Sort-aware generic parameters and defaults: <D: Dim, I: Index, N: Nat = 3, F: Type = Marker>",
       "begin": "<(?=[A-Z]\\w*\\s*:)",
@@ -948,7 +955,7 @@
     },
 
     "builtin-types": {
-      "match": "\\b(Dimensionless|Bool|Int|Datetime|Complex|Dim|Index|Nat|Type)\\b",
+      "match": "\\b(Dimensionless|Bool|Int|Datetime|Complex|Key|Dim|Index|Nat|Type)\\b",
       "name": "support.type.graphcal"
     },
 
