@@ -948,7 +948,7 @@
     },
 
     "builtin-types": {
-      "match": "\\b(Dimensionless|Bool|Int|Datetime|Dim|Index|Nat|Type)\\b",
+      "match": "\\b(Dimensionless|Bool|Int|Datetime|Complex|Dim|Index|Nat|Type)\\b",
       "name": "support.type.graphcal"
     },
 
