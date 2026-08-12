@@ -775,8 +775,8 @@
     },
 
     "conversion-target": {
-      "comment": "Conversion target after '->' in expressions: @a -> km, @a -> u.mile, @a -> m/s^2, @x -> 1/min. A unit reference is a bare name or `alias.unit` through a module-import alias (graphcal#821). Dag return types after ') ->' are handled by #return-type, which precedes this rule.",
-      "match": "(->)\\s*((?:1\\s*/\\s*)?[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?(?:\\s*[*/]\\s*[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?)*)",
+      "comment": "Conversion target after '->' in expressions: @a -> km, @a -> u.mile, @a -> m/s^2, @x -> 1/min, @p -> (kg * m/s). A unit reference is a bare name or `alias.unit` through a module-import alias (graphcal#821). Dag return types after ') ->' are handled by #return-type, which precedes this rule.",
+      "match": "(->)\\s*((?:(?:1\\s*/\\s*)?[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?(?:\\s*[*/]\\s*[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?)*|\\([^\\r\\n()]+\\)(?:\\^-?[0-9]+(?:/[0-9]+)?)?))",
       "captures": {
         "1": { "name": "keyword.operator.arrow.graphcal" },
         "2": { "patterns": [{ "include": "#unit-expression-segments" }] }
@@ -784,8 +784,8 @@
     },
 
     "quantity-literal": {
-      "comment": "Quantity literal: a number juxtaposed with a unit expression — 2.0 km, 9.81 m/s^2, 2.0 u.mile. A single dotted qualifier names a module-import alias (graphcal#821).",
-      "match": "\\b([0-9][0-9_]*(?:\\.[0-9][0-9_]*)?(?:[eE][+-]?[0-9]+)?)\\s+(?!(?:if|else|match|for|in|as|true|false)\\b)([a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?(?:\\s*[*/]\\s*[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?)*)",
+      "comment": "Quantity literal: a number and same-line unit expression — 2.0 km, 9.81 m/s^2, 2.0 1/s, 3.0 (kg * m/s), 2.0 u.mile. A single dotted qualifier names a module-import alias (graphcal#821).",
+      "match": "\\b([0-9][0-9_]*(?:\\.[0-9][0-9_]*)?(?:[eE][+-]?[0-9]+)?)[ \\t]+(?!(?:if|else|match|for|in|as|true|false)\\b)((?:(?:1[ \\t]*/[ \\t]*)?[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?(?:[ \\t]*[*/][ \\t]*[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?)*|\\([^\\r\\n()]+\\)(?:\\^-?[0-9]+(?:/[0-9]+)?)?))",
       "captures": {
         "1": { "name": "constant.numeric.graphcal" },
         "2": { "patterns": [{ "include": "#unit-expression-segments" }] }
@@ -805,7 +805,8 @@
         },
         { "match": "[a-zA-Z][a-zA-Z0-9_]*", "name": "entity.name.type.unit.graphcal" },
         { "match": "-?[0-9]+(?:/[0-9]+)?", "name": "constant.numeric.graphcal" },
-        { "match": "[*/^]", "name": "keyword.operator.arithmetic.graphcal" }
+        { "match": "[*/^]", "name": "keyword.operator.arithmetic.graphcal" },
+        { "match": "[()]", "name": "punctuation.brackets.round.graphcal" }
       ]
     },
 
