@@ -48,7 +48,7 @@
     { "include": "#qualified-variant" },
     { "include": "#booleans" },
     { "include": "#wildcard" },
-    { "include": "#unit-literal" },
+    { "include": "#quantity-literal" },
     { "include": "#numbers" },
     { "include": "#builtin-types" },
     { "include": "#upper-constant" },
@@ -65,7 +65,7 @@
     "strings": {
       "name": "string.quoted.double.graphcal",
       "begin": "\"",
-      "end": "\"",
+      "end": "\"|$",
       "beginCaptures": {
         "0": { "name": "punctuation.definition.string.begin.graphcal" }
       },
@@ -381,12 +381,11 @@
     },
 
     "import-declaration": {
-      "comment": "Import: import nasa.rocket; / import nasa.rocket as r; / import nasa.rocket.{type X, dim D, unit u, index I, Y as Z};",
-      "begin": "(?:\\b(pub(?:\\s*\\(\\s*bind\\s*\\))?)\\s+)?\\b(import)\\b",
+      "comment": "Import use-sites have no leading visibility: import nasa.rocket; / import nasa.rocket as r; / import nasa.rocket.{type X, dim D, unit u, index I, pub Y as Z};",
+      "begin": "\\b(import)\\b",
       "end": ";",
       "beginCaptures": {
-        "1": { "name": "keyword.other.pub.graphcal" },
-        "2": { "name": "keyword.declaration.import.graphcal" }
+        "1": { "name": "keyword.declaration.import.graphcal" }
       },
       "endCaptures": {
         "0": { "name": "punctuation.terminator.graphcal" }
@@ -419,12 +418,11 @@
     },
 
     "include-declaration": {
-      "comment": "Include: include nasa.rocket(args); / include nasa.rocket(args) as r; / include nasa.rocket(args).{out};",
-      "begin": "(?:\\b(pub(?:\\s*\\(\\s*bind\\s*\\))?)\\s+)?\\b(include)\\b",
+      "comment": "Include use-sites have no leading visibility: include nasa.rocket(args); / include nasa.rocket(args) as r; / include nasa.rocket(args).{pub out};",
+      "begin": "\\b(include)\\b",
       "end": ";",
       "beginCaptures": {
-        "1": { "name": "keyword.other.pub.graphcal" },
-        "2": { "name": "keyword.declaration.include.graphcal" }
+        "1": { "name": "keyword.declaration.include.graphcal" }
       },
       "endCaptures": {
         "0": { "name": "punctuation.terminator.graphcal" }
@@ -785,8 +783,8 @@
       }
     },
 
-    "unit-literal": {
-      "comment": "Unit literal: a number juxtaposed with a unit expression — 2.0 km, 9.81 m/s^2, 2.0 u.mile. A single dotted qualifier names a module-import alias (graphcal#821).",
+    "quantity-literal": {
+      "comment": "Quantity literal: a number juxtaposed with a unit expression — 2.0 km, 9.81 m/s^2, 2.0 u.mile. A single dotted qualifier names a module-import alias (graphcal#821).",
       "match": "\\b([0-9][0-9_]*(?:\\.[0-9][0-9_]*)?(?:[eE][+-]?[0-9]+)?)\\s+(?!(?:if|else|match|for|in|as|true|false)\\b)([a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?(?:\\s*[*/]\\s*[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?)*)",
       "captures": {
         "1": { "name": "constant.numeric.graphcal" },
