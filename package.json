@@ -25,7 +25,7 @@
     "vscode-languageclient": "^10.0.0"
   },
   "devDependencies": {
-    "@types/vscode": "1.125.0",
+    "@types/vscode": "1.134.0",
     "@vscode/vsce": "3.9.2",
     "esbuild": "0.28.2",
     "typescript": "7.0.2"
@@ -98,7 +98,7 @@
     "onLanguage:graphcal"
   ],
   "engines": {
-    "vscode": "^1.125.0"
+    "vscode": "^1.134.0"
   },
   "packageManager": "npm@12.0.2"
 }
