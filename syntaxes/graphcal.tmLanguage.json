@@ -240,7 +240,7 @@
     },
 
     "attribute": {
-      "comment": "Attribute: #[name] or #[name(arg1, Index.Variant, #2, (A.X, #1))]",
+      "comment": "Attribute: #[name] or #[name(arg1, Index#Variant, #2, (A#X, #1))]",
       "begin": "(#)(\\[)",
       "end": "(\\])",
       "beginCaptures": {
@@ -257,8 +257,8 @@
           "name": "entity.other.attribute-name.graphcal"
         },
         {
-          "match": "\\.",
-          "name": "punctuation.accessor.dot.graphcal"
+          "match": "::|#|\\.",
+          "name": "punctuation.accessor.graphcal"
         },
         {
           "match": "[(),]",
@@ -381,11 +381,12 @@
     },
 
     "import-declaration": {
-      "comment": "Import use-sites have no leading visibility: import nasa.rocket; / import nasa.rocket as r; / import nasa.rocket.{type X, dim D, unit u, index I, pub Y as Z};",
-      "begin": "\\b(import)\\b",
+      "comment": "Whole-DAG imports may be public; selective imports use `::{ ... }` and per-item visibility.",
+      "begin": "(?:\\b(pub)\\s+)?\\b(import)\\b",
       "end": ";",
       "beginCaptures": {
-        "1": { "name": "keyword.declaration.import.graphcal" }
+        "1": { "name": "keyword.other.pub.graphcal" },
+        "2": { "name": "keyword.declaration.import.graphcal" }
       },
       "endCaptures": {
         "0": { "name": "punctuation.terminator.graphcal" }
@@ -418,7 +419,7 @@
     },
 
     "include-declaration": {
-      "comment": "Include use-sites have no leading visibility: include nasa.rocket(args); / include nasa.rocket(args) as r; / include nasa.rocket(args).{pub out};",
+      "comment": "Include use-sites have no leading visibility: include nasa.rocket(args); / include nasa.rocket(args) as r; / include nasa.rocket(args)::{pub out};",
       "begin": "\\b(include)\\b",
       "end": ";",
       "beginCaptures": {
@@ -443,7 +444,7 @@
     },
 
     "import-param-bindings": {
-      "comment": "Param bindings for module instantiation: (name: expr, ...)",
+      "comment": "DAG input bindings: unmarked params or `type`/`dim`/`index` Static inputs.",
       "begin": "\\(",
       "end": "\\)",
       "beginCaptures": {
@@ -454,11 +455,12 @@
       },
       "patterns": [
         {
-          "comment": "Param binding: name: expr",
-          "match": "\\b([a-zA-Z][a-zA-Z0-9_]*)\\s*(:)",
+          "comment": "Input binding: [type|dim|index] name: expr",
+          "match": "(?:\\b(type|dim|index)\\s+)?\\b([a-zA-Z][a-zA-Z0-9_]*)\\s*(:)",
           "captures": {
-            "1": { "name": "variable.other.graphcal" },
-            "2": { "name": "punctuation.separator.colon.graphcal" }
+            "1": { "name": "keyword.declaration.input-category.graphcal" },
+            "2": { "name": "variable.other.graphcal" },
+            "3": { "name": "punctuation.separator.colon.graphcal" }
           }
         },
         { "include": "#graph-ref" },
@@ -561,8 +563,8 @@
           }
         },
         {
-          "comment": "Named index binding: var: IndexName or var: module.IndexName",
-          "match": "\\b([a-zA-Z][a-zA-Z0-9_]*)\\s*(:)\\s*([a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*)",
+          "comment": "Named index binding: var: IndexName or var: module::IndexName",
+          "match": "\\b([a-zA-Z][a-zA-Z0-9_]*)\\s*(:)\\s*((?:[a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*\\s*::\\s*)?[a-zA-Z][a-zA-Z0-9_]*)",
           "captures": {
             "1": { "name": "variable.other.graphcal" },
             "2": { "name": "punctuation.separator.colon.graphcal" },
@@ -581,7 +583,7 @@
     },
 
     "table-index-list": {
-      "comment": "Typed axes in table[Named, module.Axis, Fin(3)].",
+      "comment": "Typed axes in table[Named, module::Axis, Fin(3)].",
       "begin": "\\b(table)\\s*(\\[)",
       "end": "(\\])",
       "beginCaptures": {
@@ -600,7 +602,7 @@
         },
         { "include": "#numbers" },
         {
-          "match": "\\b[a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*\\b",
+          "match": "\\b(?:[a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*\\s*::\\s*)?[a-zA-Z][a-zA-Z0-9_]*\\b",
           "name": "entity.name.type.graphcal"
         },
         {
@@ -621,13 +623,13 @@
 
     "recurrence-keyword": {
       "comment": "Bare scan( and unfold( commit to recurrence syntax; qualified calls and other uses are identifiers.",
-      "match": "(?<!\\.)\\b(scan|unfold)\\b(?=\\s*\\()",
+      "match": "(?<![.:])\\b(scan|unfold)\\b(?=\\s*\\()",
       "name": "support.function.builtin.graphcal"
     },
 
     "key-former-keyword": {
       "comment": "Bare key(, fin_key(, floor_key(, ceil_key(, and nearest_key( commit to key-former syntax; qualified calls and other uses are identifiers.",
-      "match": "(?<!\\.)\\b(key|fin_key|floor_key|ceil_key|nearest_key)\\b(?=\\s*\\()",
+      "match": "(?<![.:])\\b(key|fin_key|floor_key|ceil_key|nearest_key)\\b(?=\\s*\\()",
       "name": "support.function.builtin.graphcal"
     },
 
@@ -672,8 +674,8 @@
     },
 
     "generic-call-application": {
-      "comment": "A constructor or parsed function call with sort-aware generic arguments, such as Fixed<3>(...) or module.Matrix<M * N + 1>(...). Functions currently reject non-empty generic lists semantically.",
-      "begin": "\\b([a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*)\\s*(<)(?=[^\\n]*>\\s*\\()",
+      "comment": "A constructor or parsed function call with sort-aware generic arguments, such as Fixed<3>(...) or module::Matrix<M * N + 1>(...). Functions currently reject non-empty generic lists semantically.",
+      "begin": "\\b((?:[a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*\\s*::\\s*)?[a-zA-Z][a-zA-Z0-9_]*)\\s*(<)(?=[^\\n]*>\\s*\\()",
       "end": "(>)",
       "beginCaptures": {
         "1": { "name": "entity.name.function.graphcal" },
@@ -731,8 +733,8 @@
           "name": "punctuation.separator.comma.graphcal"
         },
         {
-          "match": "\\.",
-          "name": "punctuation.accessor.dot.graphcal"
+          "match": "::|\\.",
+          "name": "punctuation.accessor.graphcal"
         }
       ]
     },
@@ -775,8 +777,8 @@
     },
 
     "conversion-target": {
-      "comment": "Conversion target after '->' in expressions: @a -> km, @a -> u.mile, @a -> m/s^2, @x -> 1/min, @p -> (kg * m/s). A unit reference is a bare name or `alias.unit` through a module-import alias (graphcal#821). Dag return types after ') ->' are handled by #return-type, which precedes this rule.",
-      "match": "(->)\\s*((?:(?:1\\s*/\\s*)?[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?(?:\\s*[*/]\\s*[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?)*|\\([^\\r\\n()]+\\)(?:\\^-?[0-9]+(?:/[0-9]+)?)?))",
+      "comment": "Conversion target after '->' in expressions: @a -> km, @a -> u::mile, @a -> m/s^2, @x -> 1/min, @p -> (kg * m/s).",
+      "match": "(->)\\s*((?:(?:1\\s*/\\s*)?[a-zA-Z][a-zA-Z0-9_]*(?:(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*\\s*::\\s*[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?(?:\\s*[*/]\\s*[a-zA-Z][a-zA-Z0-9_]*(?:(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*\\s*::\\s*[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?)*|\\([^\\r\\n()]+\\)(?:\\^-?[0-9]+(?:/[0-9]+)?)?))",
       "captures": {
         "1": { "name": "keyword.operator.arrow.graphcal" },
         "2": { "patterns": [{ "include": "#unit-expression-segments" }] }
@@ -784,8 +786,8 @@
     },
 
     "quantity-literal": {
-      "comment": "Quantity literal: a number and same-line unit expression — 2.0 km, 9.81 m/s^2, 2.0 1/s, 3.0 (kg * m/s), 2.0 u.mile. A single dotted qualifier names a module-import alias (graphcal#821).",
-      "match": "\\b([0-9][0-9_]*(?:\\.[0-9][0-9_]*)?(?:[eE][+-]?[0-9]+)?)[ \\t]+(?!(?:if|else|match|for|in|as|true|false)\\b)((?:(?:1[ \\t]*/[ \\t]*)?[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?(?:[ \\t]*[*/][ \\t]*[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?)*|\\([^\\r\\n()]+\\)(?:\\^-?[0-9]+(?:/[0-9]+)?)?))",
+      "comment": "Quantity literal: a number and same-line unit expression — 2.0 km, 9.81 m/s^2, 2.0 1/s, 3.0 (kg * m/s), 2.0 u::mile.",
+      "match": "\\b([0-9][0-9_]*(?:\\.[0-9][0-9_]*)?(?:[eE][+-]?[0-9]+)?)[ \\t]+(?!(?:if|else|match|for|in|as|true|false)\\b)((?:(?:1[ \\t]*/[ \\t]*)?[a-zA-Z][a-zA-Z0-9_]*(?:(?:[ \\t]*\\.[ \\t]*[a-zA-Z][a-zA-Z0-9_]*)*[ \\t]*::[ \\t]*[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?(?:[ \\t]*[*/][ \\t]*[a-zA-Z][a-zA-Z0-9_]*(?:(?:[ \\t]*\\.[ \\t]*[a-zA-Z][a-zA-Z0-9_]*)*[ \\t]*::[ \\t]*[a-zA-Z][a-zA-Z0-9_]*)?(?:\\^-?[0-9]+(?:/[0-9]+)?)?)*|\\([^\\r\\n()]+\\)(?:\\^-?[0-9]+(?:/[0-9]+)?)?))",
       "captures": {
         "1": { "name": "constant.numeric.graphcal" },
         "2": { "patterns": [{ "include": "#unit-expression-segments" }] }
@@ -793,13 +795,13 @@
     },
 
     "unit-expression-segments": {
-      "comment": "Segments inside a matched unit expression. `alias.unit` highlights the qualifier as a module alias and the leaf as a unit; bare names are units.",
+      "comment": "Segments inside a unit expression. `alias.child::unit` preserves the namespace/member boundary.",
       "patterns": [
         {
-          "match": "([a-zA-Z][a-zA-Z0-9_]*)(\\.)([a-zA-Z][a-zA-Z0-9_]*)",
+          "match": "([a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*)(\\s*::\\s*)([a-zA-Z][a-zA-Z0-9_]*)",
           "captures": {
             "1": { "name": "entity.name.namespace.graphcal" },
-            "2": { "name": "punctuation.accessor.dot.graphcal" },
+            "2": { "name": "punctuation.accessor.graphcal" },
             "3": { "name": "entity.name.type.unit.graphcal" }
           }
         },
@@ -811,31 +813,31 @@
     },
 
     "match-index-label-pattern": {
-      "comment": "Qualified fieldless index-label match patterns: Maneuver.Departure => ... or module.Maneuver.Departure => ...",
-      "match": "\\b([a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)+)\\s*(?==>)",
+      "comment": "Owner-qualified fieldless index-label patterns: Maneuver#Departure or module::Maneuver#Departure.",
+      "match": "\\b((?:[a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*\\s*::\\s*)?[a-zA-Z][a-zA-Z0-9_]*\\s*#\\s*[A-Z][a-zA-Z0-9_]*)\\s*(?==>)",
       "captures": {
         "1": { "name": "entity.name.type.index.graphcal" }
       }
     },
 
     "match-constructor-pattern": {
-      "comment": "Type-constructor match patterns: Impulsive(delta_v: dv) => ..., module.Pick(...) => ..., or Coast => ...",
-      "match": "\\b([a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*)\\s*(?=(?:\\([^)]*\\)\\s*)?=>)",
+      "comment": "Type-constructor patterns: Impulsive(...) => ..., module::Pick(...) => ..., or Coast => ...",
+      "match": "\\b((?:[a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*\\s*::\\s*)?[a-zA-Z][a-zA-Z0-9_]*)\\s*(?=(?:\\([^)]*\\)\\s*)?=>)",
       "captures": {
         "1": { "name": "entity.name.type.constructor.graphcal" }
       }
     },
 
     "fn-call": {
-      "comment": "Non-generic function and constructor calls: sqrt(...), TransferResult(...), module.Pick(...), etc. Generic calls are handled by #generic-call-application.",
-      "match": "\\b([a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*)\\s*(?=(<[^>]*>)?\\s*\\()",
+      "comment": "Non-generic calls: sqrt(...), TransferResult(...), module::Pick(...), etc.",
+      "match": "\\b((?:[a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*\\s*::\\s*)?[a-zA-Z][a-zA-Z0-9_]*)\\s*(?=(<[^>]*>)?\\s*\\()",
       "captures": {
         "1": { "name": "entity.name.function.graphcal" }
       }
     },
 
     "type-annotation": {
-      "comment": "Type annotation after ':' — matches ': Type', ': module.Type[Index, ...]', ': Type(min: expr, max: expr)'",
+      "comment": "Type annotation after ':' — matches ': Type', ': module::Type[Index, ...]', ': Type(min: expr, max: expr)'",
       "begin": "(?<=\\w)\\s*(:)\\s*(?=[A-Za-z])",
       "end": "(?=[=;,){])",
       "beginCaptures": {
@@ -852,7 +854,7 @@
         { "include": "#builtin-types" },
         { "include": "#type-constraints" },
         {
-          "match": "\\b([a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*)\\b",
+          "match": "\\b((?:[a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*\\s*::\\s*)?[a-zA-Z][a-zA-Z0-9_]*)\\b",
           "name": "entity.name.type.graphcal"
         },
         {
@@ -902,8 +904,8 @@
     },
 
     "graph-ref": {
-      "comment": "Graph reference: @name. The leading identifier after `@` is highlighted here as a variable; if a qualified inline DAG call follows (`@module.dag(args).out`), the dotted path segments get the same `variable.other` highlight, and the `inline-dag-output-projection` rule colours the `.out` projection after the closing paren. What `@` enforces is semantic — the post-`@` expression must denote a *node* — not a count of identifiers.",
-      "match": "(@)([a-zA-Z][a-zA-Z0-9_]*)",
+      "comment": "Graph reference: @name or @instance::member. Dotted paths before a call remain DAG traversal.",
+      "match": "(@)((?:[a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*\\s*::\\s*)?[a-zA-Z][a-zA-Z0-9_]*)",
       "captures": {
         "1": { "name": "punctuation.definition.variable.graphcal" },
         "2": { "name": "variable.other.graphcal" }
@@ -911,31 +913,31 @@
     },
 
     "inline-dag-output-projection": {
-      "comment": "Output projection following an inline DAG invocation: `).output`",
-      "match": "(\\))(\\.)([a-zA-Z][a-zA-Z0-9_]*)",
+      "comment": "Output projection following an inline DAG invocation: `)::output`",
+      "match": "(\\))(::)([a-zA-Z][a-zA-Z0-9_]*)",
       "captures": {
         "1": { "name": "punctuation.brackets.round.graphcal" },
-        "2": { "name": "punctuation.accessor.dot.graphcal" },
+        "2": { "name": "punctuation.accessor.graphcal" },
         "3": { "name": "variable.other.graphcal" }
       }
     },
 
     "qualified-const-ref": {
-      "comment": "Qualified built-in/user constant reference: module.CONST_NAME or module.path.CONST_NAME",
-      "match": "\\b([a-z][a-z0-9_]*(?:\\s*\\.\\s*[a-z][a-z0-9_]*)*)(\\.)([A-Z][A-Z0-9_]*)\\b",
+      "comment": "Qualified built-in/user constant reference: module::CONST_NAME or module.path::CONST_NAME",
+      "match": "\\b([a-z][a-z0-9_]*(?:\\s*\\.\\s*[a-z][a-z0-9_]*)*)(\\s*::\\s*)([A-Z][A-Z0-9_]*)\\b",
       "captures": {
         "1": { "name": "entity.name.namespace.graphcal" },
-        "2": { "name": "punctuation.accessor.dot.graphcal" },
+        "2": { "name": "punctuation.accessor.graphcal" },
         "3": { "name": "variable.other.constant.graphcal" }
       }
     },
 
     "qualified-variant": {
-      "comment": "Qualified variant/path used by maps, table slices, and heterogeneous headers: Maneuver.Departure or module.Maneuver.Departure. Ordinary table row/column labels stay bare.",
-      "match": "\\b([a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*)(\\.)([A-Z][a-zA-Z0-9_]*)\\b",
+      "comment": "Owner-qualified label used by maps and slices: Maneuver#Departure or module::Maneuver#Departure. Ordinary table rows/columns stay bare.",
+      "match": "\\b((?:[a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*\\s*::\\s*)?[a-zA-Z][a-zA-Z0-9_]*)(\\s*#\\s*)([A-Z][a-zA-Z0-9_]*)\\b",
       "captures": {
         "1": { "name": "entity.name.type.graphcal" },
-        "2": { "name": "punctuation.accessor.dot.graphcal" },
+        "2": { "name": "punctuation.definition.index-label.graphcal" },
         "3": { "name": "variable.other.enummember.graphcal" }
       }
     },
@@ -1040,8 +1042,8 @@
           "name": "punctuation.separator.colon.graphcal"
         },
         {
-          "match": "\\.",
-          "name": "punctuation.accessor.dot.graphcal"
+          "match": "::|#|\\.",
+          "name": "punctuation.accessor.graphcal"
         },
         {
           "match": "\\|",
