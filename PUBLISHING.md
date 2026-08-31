@@ -3,8 +3,8 @@
 1. Install dependencies and build the extension:
 
    ```sh
-   npm install
-   npm run compile
+   vp install
+   vpr compile
    ```
 
    The extension is bundled with esbuild. Runtime dependencies such as
@@ -23,22 +23,26 @@
    > VS Code recommends using odd minor versions for pre-releases and even minor versions for regular releases.
    > For example, use `0.1.0` for a pre-release and `0.2.x` for the corresponding regular release line.
 
-4. Create a Visual Studio Marketplace personal access token (PAT), then expose it as `VSCE_PAT`:
+4. Sign in to the 1Password CLI:
 
    ```sh
-   export VSCE_PAT="<token>"
+   op signin
    ```
+
+   The PAT is stored in the dedicated `Graphcal` vault. The committed `.env`
+   contains only its 1Password secret reference; publishing recipes pass that
+   file to `op run`, which injects the PAT only into the child process.
 
 5. Verify that the PAT can publish for the configured publisher:
 
    ```sh
-   npx vsce verify-pat Graphcal
+   just verify-pat
    ```
 
 6. Package the VSIX as a pre-release:
 
    ```sh
-   npm run package -- --pre-release
+   just package
    ```
 
    This runs `vscode:prepublish`, which typechecks and creates a production
@@ -47,7 +51,7 @@
 7. Inspect the packaged contents before publishing:
 
    ```sh
-   npx vsce ls --no-dependencies
+   just inspect
    ```
 
    The VSIX should include `out/extension.js` and should not include
@@ -56,11 +60,11 @@
 8. Publish the packaged VSIX as a pre-release:
 
    ```sh
-   npx vsce publish --no-dependencies --pre-release --packagePath graphcal-0.1.0.vsix
+   just publish graphcal-0.3.0.vsix
    ```
 
    Alternatively, publish directly from the working tree as a pre-release:
 
    ```sh
-   npx vsce publish --no-dependencies --pre-release
+   just publish-direct
    ```
