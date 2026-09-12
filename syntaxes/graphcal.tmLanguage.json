@@ -30,6 +30,7 @@
     { "include": "#import-declaration" },
     { "include": "#for-binding" },
     { "include": "#table-index-list" },
+    { "include": "#todo-definition" },
     { "include": "#as-keyword" },
     { "include": "#control-keywords" },
     { "include": "#generic-params" },
@@ -198,6 +199,15 @@
         "1": { "name": "keyword.other.pub.graphcal" },
         "2": { "name": "keyword.declaration.param.graphcal" },
         "3": { "name": "variable.other.graphcal" }
+      }
+    },
+
+    "todo-definition": {
+      "comment": "Contextual node-definition marker, never an ordinary call or graph reference.",
+      "match": "(?<![=!<>])(=)\\s*(todo)\\b(?=\\s*\\{)",
+      "captures": {
+        "1": { "name": "keyword.operator.graphcal" },
+        "2": { "name": "keyword.other.todo.graphcal" }
       }
     },
 
