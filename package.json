@@ -19,7 +19,8 @@
     "compile": "npm run check-types && npm run build -- --sourcemap",
     "watch": "npm run build -- --sourcemap --watch",
     "vscode:prepublish": "npm run check-types && npm run build -- --minify",
-    "package": "vsce package --no-dependencies"
+    "package": "vsce package --no-dependencies",
+    "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {
     "vscode-languageclient": "^10.0.0"
