@@ -1,0 +1,16 @@
+allowBuilds:
+  "@vscode/vsce-sign": true
+  keytar: true
+catalog:
+  vite: npm:@voidzero-dev/vite-plus-core@0.3.2
+  vite-plus: 0.3.2
+overrides:
+  vite@*: "catalog:"
+onlyBuiltDependencies:
+  - "@vscode/vsce-sign"
+  - keytar
+peerDependencyRules:
+  allowAny:
+    - vite
+  allowedVersions:
+    vite: "*"

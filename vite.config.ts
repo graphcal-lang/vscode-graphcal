@@ -15,6 +15,7 @@ export default defineConfig({
     target: "node20",
     outputOptions: { entryFileNames: "[name].js" },
     deps: {
+      resolveDepSubpath: true,
       alwaysBundle: [/^vscode-languageclient(?:\/|$)/],
       neverBundle: ["vscode"],
       onlyBundle: false,
