@@ -25,20 +25,23 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@9fd26ff49f9b5e6276c2b493da4454ad4527f7f4 # v1.20.0
         with:
-          node-version: 24.x
-          cache: npm
+          node-version: 24
+          cache: true
 
       - name: Install dependencies
-        run: npm ci
+        run: vp install --frozen-lockfile
+
+      - name: Check
+        run: vp check
 
       - name: Test grammar
-        run: npm test
+        run: vp test
 
-      - name: Compile
-        run: npm run compile
+      - name: Build
+        run: vp pack --sourcemap
 
       - name: Package extension
-        run: npm run package
+        run: vp run package

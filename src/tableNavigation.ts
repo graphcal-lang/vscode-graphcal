@@ -13,10 +13,7 @@ export interface TableRange {
  * Returns the range of the table body (between `{` and `}`), or null
  * if the cursor is not inside a table body.
  */
-export function findEnclosingTable(
-  text: string,
-  offset: number,
-): TableRange | null {
+export function findEnclosingTable(text: string, offset: number): TableRange | null {
   // Scan backward from offset to find `table[` keyword.
   // We limit the backward scan to avoid scanning the entire file.
   const maxBackwardScan = 20_000; // ~500 lines of 40 chars
@@ -96,11 +93,7 @@ export function findEnclosingTable(
  * "Next cell" means: scan forward for the next `,` or `;` separator at
  * bracket-depth 0, then skip to the start of the next value content.
  */
-export function findNextCell(
-  text: string,
-  offset: number,
-  table: TableRange,
-): number | null {
+export function findNextCell(text: string, offset: number, table: TableRange): number | null {
   let i = offset;
   let depth = 0; // bracket depth relative to table body
 
@@ -158,11 +151,7 @@ export function findNextCell(
  * Find the start offset of the previous cell value from the given offset.
  * Returns null if at the beginning of the table.
  */
-export function findPreviousCell(
-  text: string,
-  offset: number,
-  table: TableRange,
-): number | null {
+export function findPreviousCell(text: string, offset: number, table: TableRange): number | null {
   // Strategy: collect all cell start positions within the table,
   // then find the one before the current cell.
   const cells = collectCellStarts(text, table);
@@ -306,11 +295,7 @@ function collectCellStarts(text: string, table: TableRange): number[] {
  * Check if offset `i` is at the start of line content (first non-whitespace
  * character of a line, or first content after the table body opening).
  */
-function isStartOfLineContent(
-  text: string,
-  i: number,
-  bodyStart: number,
-): boolean {
+function isStartOfLineContent(text: string, i: number, bodyStart: number): boolean {
   if (i <= bodyStart + 1) return true;
   // Walk backward to see if only whitespace precedes on this line
   let j = i - 1;
@@ -326,11 +311,7 @@ function isStartOfLineContent(
  * From offset `i`, find the next `,`, `;`, or `:` at bracket depth 0.
  * Returns the offset of the separator, or null if not found before bodyEnd.
  */
-function findNextSeparator(
-  text: string,
-  start: number,
-  bodyEnd: number,
-): number | null {
+function findNextSeparator(text: string, start: number, bodyEnd: number): number | null {
   let depth = 0;
   for (let i = start; i < bodyEnd; i++) {
     const ch = text[i];
@@ -359,11 +340,7 @@ function findNextSeparator(
  * the next value. Returns the offset of the first non-whitespace character,
  * or null if we hit the end of the table body.
  */
-function skipToNextValue(
-  text: string,
-  start: number,
-  bodyEnd: number,
-): number | null {
+function skipToNextValue(text: string, start: number, bodyEnd: number): number | null {
   let i = start;
   while (i < bodyEnd) {
     const ch = text[i];
@@ -388,21 +365,12 @@ function skipToNextValue(
  * Handles: whitespace/newlines, comment lines, slice section headers `[...]`,
  * header rows (identifier columns), and data rows (label: value).
  */
-function skipToNextRowValue(
-  text: string,
-  start: number,
-  bodyEnd: number,
-): number | null {
+function skipToNextRowValue(text: string, start: number, bodyEnd: number): number | null {
   let i = skipWhitespaceAndNewlines(text, start, bodyEnd);
   if (i >= bodyEnd) return null;
 
   // Skip comment lines
-  while (
-    i < bodyEnd &&
-    text[i] === "/" &&
-    i + 1 < bodyEnd &&
-    text[i + 1] === "/"
-  ) {
+  while (i < bodyEnd && text[i] === "/" && i + 1 < bodyEnd && text[i + 1] === "/") {
     i = skipToEndOfLine(text, i);
     i = skipWhitespaceAndNewlines(text, i, bodyEnd);
   }
@@ -439,11 +407,7 @@ function skipToNextRowValue(
   return i;
 }
 
-function skipWhitespaceAndNewlines(
-  text: string,
-  start: number,
-  end: number,
-): number {
+function skipWhitespaceAndNewlines(text: string, start: number, end: number): number {
   let i = start;
   while (i < end && (text[i] === " " || text[i] === "\t" || text[i] === "\n" || text[i] === "\r")) {
     i++;

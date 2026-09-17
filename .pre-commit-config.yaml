@@ -4,7 +4,7 @@ ci:
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # frozen: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -23,17 +23,17 @@ repos:
       - id: forbid-submodules
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: 5b5dddc4fb0f83c3ea1fc5616fa63e115dce83e0  # frozen: v0.49.1
+    rev: 5b5dddc4fb0f83c3ea1fc5616fa63e115dce83e0 # frozen: v0.49.1
     hooks:
       - id: markdownlint
         args: [--disable, MD013]
 
   - repo: https://github.com/crate-ci/typos
-    rev: c132f8b9e3ac7f8f0625490b1cb5b906d1d6a63a  # frozen: v1
+    rev: c132f8b9e3ac7f8f0625490b1cb5b906d1d6a63a # frozen: v1
     hooks:
       - id: typos
 
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: cef8b8350da46d8114c7e6b7272aebdccdf193ce  # frozen: v1.30.0
+    rev: cef8b8350da46d8114c7e6b7272aebdccdf193ce # frozen: v1.30.0
     hooks:
       - id: zizmor

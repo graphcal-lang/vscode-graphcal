@@ -1,9 +1,5 @@
 import * as vscode from "vscode";
-import {
-  LanguageClient,
-  LanguageClientOptions,
-  ServerOptions,
-} from "vscode-languageclient/node";
+import { LanguageClient, LanguageClientOptions, ServerOptions } from "vscode-languageclient/node";
 import {
   findEnclosingTable,
   findNextCell,
@@ -13,9 +9,7 @@ import {
 
 let client: LanguageClient | undefined;
 
-export async function activate(
-  context: vscode.ExtensionContext,
-): Promise<void> {
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
   context.subscriptions.push(
     vscode.commands.registerCommand("graphcal.restartServer", async () => {
       if (!client) {
@@ -31,13 +25,9 @@ export async function activate(
 
   // Table cell navigation commands
   context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "graphcal.jumpToNextTableCell",
-      () => jumpTableCell("next"),
-    ),
-    vscode.commands.registerCommand(
-      "graphcal.jumpToPreviousTableCell",
-      () => jumpTableCell("previous"),
+    vscode.commands.registerCommand("graphcal.jumpToNextTableCell", () => jumpTableCell("next")),
+    vscode.commands.registerCommand("graphcal.jumpToPreviousTableCell", () =>
+      jumpTableCell("previous"),
     ),
   );
 
@@ -51,11 +41,7 @@ export async function activate(
       const text = doc.getText();
       const offset = doc.offsetAt(e.selections[0].active);
       const inTable = isInsideTable(text, offset);
-      vscode.commands.executeCommand(
-        "setContext",
-        "graphcal.cursorInTable",
-        inTable,
-      );
+      vscode.commands.executeCommand("setContext", "graphcal.cursorInTable", inTable);
     }),
   );
 
@@ -104,9 +90,7 @@ export async function deactivate(): Promise<void> {
   }
 }
 
-function createLanguageClient(
-  config: vscode.WorkspaceConfiguration,
-): LanguageClient | undefined {
+function createLanguageClient(config: vscode.WorkspaceConfiguration): LanguageClient | undefined {
   const command = resolveGraphcalPath(config);
 
   const serverOptions: ServerOptions = {
@@ -126,9 +110,7 @@ function createLanguageClient(
   );
 }
 
-function resolveGraphcalPath(
-  config: vscode.WorkspaceConfiguration,
-): string {
+function resolveGraphcalPath(config: vscode.WorkspaceConfiguration): string {
   const configured = config.get<string>("path", "");
   if (configured) {
     return configured;

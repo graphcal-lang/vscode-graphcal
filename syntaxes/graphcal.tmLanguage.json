@@ -178,10 +178,7 @@
       "endCaptures": {
         "1": { "name": "punctuation.brackets.round.graphcal" }
       },
-      "patterns": [
-        { "include": "#coordinate-index-parentheses" },
-        { "include": "$self" }
-      ]
+      "patterns": [{ "include": "#coordinate-index-parentheses" }, { "include": "$self" }]
     },
 
     "index-declaration": {
@@ -423,9 +420,7 @@
         "2": { "name": "keyword.declaration.dag.graphcal" },
         "3": { "name": "entity.name.function.dag.graphcal" }
       },
-      "patterns": [
-        { "include": "$self" }
-      ]
+      "patterns": [{ "include": "$self" }]
     },
 
     "include-declaration": {
@@ -477,7 +472,7 @@
         { "include": "#numbers" },
         { "include": "#booleans" },
         { "include": "#strings" },
-            { "include": "#fn-call" },
+        { "include": "#fn-call" },
         { "include": "#qualified-const-ref" },
         { "include": "#upper-constant" },
         { "include": "#pascal-type" },
@@ -694,9 +689,7 @@
       "endCaptures": {
         "1": { "name": "punctuation.brackets.angle.graphcal" }
       },
-      "patterns": [
-        { "include": "#generic-argument-contents" }
-      ]
+      "patterns": [{ "include": "#generic-argument-contents" }]
     },
 
     "generic-arguments": {
@@ -709,9 +702,7 @@
       "endCaptures": {
         "1": { "name": "punctuation.brackets.angle.graphcal" }
       },
-      "patterns": [
-        { "include": "#generic-argument-contents" }
-      ]
+      "patterns": [{ "include": "#generic-argument-contents" }]
     },
 
     "generic-argument-contents": {
