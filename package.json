@@ -14,13 +14,13 @@
   "publisher": "Graphcal",
   "main": "./out/extension.js",
   "scripts": {
-    "check-types": "tsc --noEmit",
-    "build": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --target=node20",
-    "compile": "npm run check-types && npm run build -- --sourcemap",
-    "watch": "npm run build -- --sourcemap --watch",
-    "vscode:prepublish": "npm run check-types && npm run build -- --minify",
+    "check": "vp check",
+    "build": "vp pack",
+    "compile": "vp check && vp pack --sourcemap",
+    "watch": "vp pack --sourcemap --watch",
+    "vscode:prepublish": "vp check && vp pack --minify",
     "package": "vsce package --no-dependencies",
-    "test": "node --test tests/*.test.mjs"
+    "test": "vp test"
   },
   "dependencies": {
     "vscode-languageclient": "^10.0.0"
@@ -28,8 +28,8 @@
   "devDependencies": {
     "@types/vscode": "1.137.0",
     "@vscode/vsce": "3.9.2",
-    "esbuild": "0.28.2",
-    "typescript": "7.0.2"
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
   },
   "contributes": {
     "languages": [
@@ -101,5 +101,5 @@
   "engines": {
     "vscode": "^1.137.0"
   },
-  "packageManager": "npm@12.0.2"
+  "packageManager": "pnpm@12.4.2"
 }

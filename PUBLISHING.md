@@ -7,9 +7,9 @@
    vpr compile
    ```
 
-   The extension is bundled with esbuild. Runtime dependencies such as
-   `vscode-languageclient` are included in `out/extension.js`; `node_modules`
-   is intentionally not shipped in the VSIX.
+   The extension is bundled with Vite+ Pack (tsdown and Rolldown). Runtime
+   dependencies such as `vscode-languageclient` are included in
+   `out/extension.js`; `node_modules` is intentionally not shipped in the VSIX.
 
 2. Make sure the `publisher` field in `package.json` matches the Visual Studio Marketplace publisher account.
 
@@ -45,8 +45,9 @@
    just package
    ```
 
-   This runs `vscode:prepublish`, which typechecks and creates a production
-   esbuild bundle, then invokes `vsce package --no-dependencies`.
+   This runs `vscode:prepublish`, which formats, lints, typechecks, and creates
+   a minified production bundle with Vite+ Pack, then invokes
+   `vsce package --no-dependencies`.
 
 7. Inspect the packaged contents before publishing:
 
