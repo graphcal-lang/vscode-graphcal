@@ -187,7 +187,7 @@ importers:
         version: 1.137.0
       '@vscode/vsce':
         specifier: 4.0.0
-        version: 4.0.0(supports-color@7.2.0)
+        version: 4.0.0
       vite:
         specifier: 'catalog:'
         version: '@voidzero-dev/vite-plus-core@0.3.2'
@@ -1194,10 +1194,6 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
-  has-flag@4.0.0:
-    resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
-    engines: {node: '>=8'}
-
   has-symbols@1.1.0:
     resolution: {integrity: sha512-1cDNdwJ2Jaohmb3sg4OmKaMBwuC48sYni5HUw2DvsC8LjGTLK9h+eb1X6RyuOHe4hT0ULCW68iomhjUoKUqlPQ==}
     engines: {node: '>= 0.4'}
@@ -1534,10 +1530,6 @@ packages:
   structured-source@4.0.0:
     resolution: {integrity: sha512-qGzRFNJDjFieQkl/sVOI2dUjHKRyL9dAJi2gCPGJLbJHBIkyOHxjuocpIEfbLioX+qSJpvbYdT49/YCdMznKxA==}
 
-  supports-color@7.2.0:
-    resolution: {integrity: sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==}
-    engines: {node: '>=8'}
-
   textextensions@6.11.0:
     resolution: {integrity: sha512-tXJwSr9355kFJI3lbCkPpUH5cP8/M0GGy2xLO34aZCjMXBaK3SoPnZwr/oWmo1FdCnELcs4npdCIOFtq9W3ruQ==}
     engines: {node: '>=4'}
@@ -1710,36 +1702,36 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@azure/core-auth@1.11.0(supports-color@7.2.0)':
+  '@azure/core-auth@1.11.0':
     dependencies:
       '@azure/abort-controller': 2.2.0
-      '@azure/core-util': 1.14.0(supports-color@7.2.0)
+      '@azure/core-util': 1.14.0
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
 
-  '@azure/core-client@1.11.1(supports-color@7.2.0)':
+  '@azure/core-client@1.11.1':
     dependencies:
       '@azure/abort-controller': 2.2.0
-      '@azure/core-auth': 1.11.0(supports-color@7.2.0)
-      '@azure/core-rest-pipeline': 1.25.0(supports-color@7.2.0)
+      '@azure/core-auth': 1.11.0
+      '@azure/core-rest-pipeline': 1.25.0
       '@azure/core-tracing': 1.4.0
-      '@azure/core-util': 1.14.0(supports-color@7.2.0)
-      '@azure/logger': 1.4.0(supports-color@7.2.0)
+      '@azure/core-util': 1.14.0
+      '@azure/logger': 1.4.0
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
 
   '@azure/core-process@1.0.0': {}
 
-  '@azure/core-rest-pipeline@1.25.0(supports-color@7.2.0)':
+  '@azure/core-rest-pipeline@1.25.0':
     dependencies:
       '@azure/abort-controller': 2.2.0
-      '@azure/core-auth': 1.11.0(supports-color@7.2.0)
+      '@azure/core-auth': 1.11.0
       '@azure/core-tracing': 1.4.0
-      '@azure/core-util': 1.14.0(supports-color@7.2.0)
-      '@azure/logger': 1.4.0(supports-color@7.2.0)
-      '@typespec/ts-http-runtime': 0.3.9(supports-color@7.2.0)
+      '@azure/core-util': 1.14.0
+      '@azure/logger': 1.4.0
+      '@typespec/ts-http-runtime': 0.3.9
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
@@ -1748,24 +1740,24 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@azure/core-util@1.14.0(supports-color@7.2.0)':
+  '@azure/core-util@1.14.0':
     dependencies:
       '@azure/abort-controller': 2.2.0
-      '@typespec/ts-http-runtime': 0.3.9(supports-color@7.2.0)
+      '@typespec/ts-http-runtime': 0.3.9
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
 
-  '@azure/identity@4.13.3(supports-color@7.2.0)':
+  '@azure/identity@4.13.3':
     dependencies:
       '@azure/abort-controller': 2.2.0
-      '@azure/core-auth': 1.11.0(supports-color@7.2.0)
-      '@azure/core-client': 1.11.1(supports-color@7.2.0)
+      '@azure/core-auth': 1.11.0
+      '@azure/core-client': 1.11.1
       '@azure/core-process': 1.0.0
-      '@azure/core-rest-pipeline': 1.25.0(supports-color@7.2.0)
+      '@azure/core-rest-pipeline': 1.25.0
       '@azure/core-tracing': 1.4.0
-      '@azure/core-util': 1.14.0(supports-color@7.2.0)
-      '@azure/logger': 1.4.0(supports-color@7.2.0)
+      '@azure/core-util': 1.14.0
+      '@azure/logger': 1.4.0
       '@azure/msal-browser': 5.22.0
       '@azure/msal-node': 6.0.1
       open: 10.2.0
@@ -1773,9 +1765,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@azure/logger@1.4.0(supports-color@7.2.0)':
+  '@azure/logger@1.4.0':
     dependencies:
-      '@typespec/ts-http-runtime': 0.3.9(supports-color@7.2.0)
+      '@typespec/ts-http-runtime': 0.3.9
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
@@ -1996,11 +1988,11 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@secretlint/core@10.2.2(supports-color@7.2.0)':
+  '@secretlint/core@10.2.2':
     dependencies:
       '@secretlint/profiler': 10.2.2
       '@secretlint/types': 10.2.2
-      debug: 4.4.3(supports-color@7.2.0)
+      debug: 4.4.3
       structured-source: 4.0.0
     transitivePeerDependencies:
       - supports-color
@@ -2050,10 +2042,10 @@ snapshots:
 
   '@types/vscode@1.137.0': {}
 
-  '@typespec/ts-http-runtime@0.3.9(supports-color@7.2.0)':
+  '@typespec/ts-http-runtime@0.3.9':
     dependencies:
-      http-proxy-agent: 7.0.2(supports-color@7.2.0)
-      https-proxy-agent: 7.0.6(supports-color@7.2.0)
+      http-proxy-agent: 7.0.2
+      https-proxy-agent: 7.0.6
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
@@ -2210,11 +2202,11 @@ snapshots:
       '@vscode/vsce-sign-win32-arm64': 2.0.6
       '@vscode/vsce-sign-win32-x64': 2.0.6
 
-  '@vscode/vsce@4.0.0(supports-color@7.2.0)':
+  '@vscode/vsce@4.0.0':
     dependencies:
-      '@azure/identity': 4.13.3(supports-color@7.2.0)
+      '@azure/identity': 4.13.3
       '@napi-rs/keyring': 1.3.0
-      '@secretlint/core': 10.2.2(supports-color@7.2.0)
+      '@secretlint/core': 10.2.2
       '@secretlint/secretlint-rule-no-dotenv': 10.2.2
       '@secretlint/secretlint-rule-preset-recommend': 10.2.2
       '@secretlint/source-creator': 10.2.2
@@ -2370,11 +2362,9 @@ snapshots:
 
   convert-source-map@2.0.0: {}
 
-  debug@4.4.3(supports-color@7.2.0):
+  debug@4.4.3:
     dependencies:
       ms: 2.1.3
-    optionalDependencies:
-      supports-color: 7.2.0
 
   default-browser-id@5.0.1: {}
 
@@ -2454,9 +2444,6 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
-  has-flag@4.0.0:
-    optional: true
-
   has-symbols@1.1.0: {}
 
   hasown@2.0.4:
@@ -2467,17 +2454,17 @@ snapshots:
     dependencies:
       lru-cache: 6.0.0
 
-  http-proxy-agent@7.0.2(supports-color@7.2.0):
+  http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.4.3(supports-color@7.2.0)
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
-  https-proxy-agent@7.0.6(supports-color@7.2.0):
+  https-proxy-agent@7.0.6:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.4.3(supports-color@7.2.0)
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -2785,11 +2772,6 @@ snapshots:
   structured-source@4.0.0:
     dependencies:
       boundary: 2.0.0
-
-  supports-color@7.2.0:
-    dependencies:
-      has-flag: 4.0.0
-    optional: true
 
   textextensions@6.11.0:
     dependencies:
