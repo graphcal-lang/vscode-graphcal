@@ -1,6 +1,7 @@
 **
 !out/extension.js
 !syntaxes/**
+!icons/**
 !language-configuration.json
 !LICENSE
 !README.md
