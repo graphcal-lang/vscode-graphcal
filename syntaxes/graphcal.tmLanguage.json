@@ -22,6 +22,7 @@
     { "include": "#plot-declaration" },
     { "include": "#mark-keyword" },
     { "include": "#encode-keyword" },
+    { "include": "#plots-keyword" },
     { "include": "#figure-declaration" },
     { "include": "#layer-declaration" },
     { "include": "#dag-declaration" },
@@ -304,6 +305,14 @@
       "match": "\\b(encode)\\s*:",
       "captures": {
         "1": { "name": "keyword.other.encode.graphcal" }
+      }
+    },
+
+    "plots-keyword": {
+      "comment": "`plots` is a contextual keyword in figure and layer declarations: `plots: [name, ...]`. Engages only when the field value is a `[` list.",
+      "match": "\\b(plots)\\s*:(?=\\s*\\[)",
+      "captures": {
+        "1": { "name": "keyword.other.plots.graphcal" }
       }
     },
 
