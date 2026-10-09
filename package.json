@@ -26,7 +26,7 @@
     "vscode-languageclient": "^10.0.0"
   },
   "devDependencies": {
-    "@types/vscode": "1.138.0",
+    "@types/vscode": "1.140.0",
     "@vscode/vsce": "4.0.0",
     "vite": "catalog:",
     "vite-plus": "catalog:"
@@ -104,7 +104,7 @@
   ],
   "icon": "icons/extension.png",
   "engines": {
-    "vscode": "^1.138.0"
+    "vscode": "^1.140.0"
   },
   "packageManager": "pnpm@12.9.1"
 }
