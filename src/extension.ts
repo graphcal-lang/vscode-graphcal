@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { LanguageClient, LanguageClientOptions, ServerOptions } from "vscode-languageclient/node";
+import { applyChangesFromClipboard } from "./applyChanges";
 import { GraphcalView, viewModelFeature } from "./view";
 import {
   findEnclosingTable,
@@ -24,6 +25,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       }
     }),
     vscode.commands.registerCommand("graphcal.openView", () => view.open()),
+    vscode.commands.registerCommand("graphcal.applyChangesFromClipboard", () =>
+      applyChangesFromClipboard(),
+    ),
     vscode.window.onDidChangeActiveTextEditor((editor) => view.follow(editor)),
   );
 

@@ -92,6 +92,10 @@
           "light": "./icons/graphcal.svg",
           "dark": "./icons/graphcal.svg"
         }
+      },
+      {
+        "command": "graphcal.applyChangesFromClipboard",
+        "title": "Graphcal: Apply Changes from Clipboard"
       }
     ],
     "keybindings": [
