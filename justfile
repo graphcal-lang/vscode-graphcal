@@ -17,3 +17,7 @@ publish vsix:
 # Publish a pre-release directly from the working tree.
 publish-direct:
     op run --env-file=.env -- vp exec vsce publish --no-dependencies --pre-release
+
+# Build the view webview bundle from ../graphcal/web/view into media/view.
+view-bundle:
+    cd ../graphcal/web/view && VIEW_OUT=../../../vscode-graphcal/media/view node_modules/.bin/vp build --config vite.webview.config.ts

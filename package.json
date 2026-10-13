@@ -84,6 +84,11 @@
       {
         "command": "graphcal.jumpToPreviousTableCell",
         "title": "Graphcal: Jump to Previous Table Cell"
+      },
+      {
+        "command": "graphcal.openView",
+        "title": "Graphcal: Open View",
+        "icon": "$(table)"
       }
     ],
     "keybindings": [
@@ -97,7 +102,16 @@
         "key": "shift+tab",
         "when": "editorTextFocus && !editorReadonly && editorLangId == 'graphcal' && graphcal.cursorInTable && !suggestWidgetVisible && !inlineSuggestionVisible && !editorTabMovesFocus && !inSnippetMode"
       }
-    ]
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "graphcal.openView",
+          "when": "editorLangId == graphcal",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "activationEvents": [
     "onLanguage:graphcal"
