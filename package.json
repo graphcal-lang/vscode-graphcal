@@ -88,7 +88,10 @@
       {
         "command": "graphcal.openView",
         "title": "Graphcal: Open View",
-        "icon": "$(table)"
+        "icon": {
+          "light": "./icons/graphcal.svg",
+          "dark": "./icons/graphcal.svg"
+        }
       }
     ],
     "keybindings": [
