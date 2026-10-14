@@ -113,6 +113,7 @@ export class GraphcalView {
       { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
       { enableScripts: true, localResourceRoots: [media], retainContextWhenHidden: true },
     );
+    panel.iconPath = vscode.Uri.joinPath(this.context.extensionUri, "icons", "graphcal.svg");
     this.panel = panel;
     this.ready = false;
     panel.webview.html = this.html(panel.webview, media);
