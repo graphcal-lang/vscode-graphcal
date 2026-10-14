@@ -171,7 +171,7 @@ export class GraphcalView {
   }
 
   /** Open the panel beside the editor for the active `.gcl` file. */
-  open(): void {
+  async open(): Promise<void> {
     const editor = vscode.window.activeTextEditor;
     if (editor && viewable(editor.document)) this.main = editor.document.uri;
     const existing = this.session;
@@ -181,6 +181,15 @@ export class GraphcalView {
       return;
     }
     const media = vscode.Uri.joinPath(this.context.extensionUri, "media", "view");
+    // A build packaged without `just view-bundle` would open an empty panel.
+    if (!(await exists(vscode.Uri.joinPath(media, "view.js")))) {
+      void vscode.window.showErrorMessage(
+        "Graphcal: this build of the extension has no view bundle (media/view), so the view cannot open.",
+      );
+      return;
+    }
+    // Another open may have made the panel while the bundle was looked for.
+    if (this.session) return;
     const panel = vscode.window.createWebviewPanel(
       "graphcal.view",
       "Graphcal View",
