@@ -236,6 +236,7 @@ export class GraphcalView {
     void this.panel?.webview.postMessage(message);
   }
 
+  /** The page: the bundle brings the view's markup with it, so the body holds only the script. */
   private html(webview: vscode.Webview, media: vscode.Uri): string {
     const script = webview.asWebviewUri(vscode.Uri.joinPath(media, "view.js")).toString();
     const style = webview.asWebviewUri(vscode.Uri.joinPath(media, "view.css")).toString();
@@ -259,28 +260,6 @@ export class GraphcalView {
     <link rel="stylesheet" href="${style}" />
   </head>
   <body>
-    <header class="bar">
-      <span class="bar-file" id="file">loading…</span>
-      <span></span>
-      <span class="bar-right">
-        <span class="modes">
-          <button type="button" data-mode="fit" title="everything at full size; pan to see the rest">fit</button>
-          <button type="button" data-mode="overview" title="scale the whole view to fit">overview</button>
-          <button type="button" class="zoom" id="zoom" title="zoom">100%</button>
-        </span>
-        <label class="bar-fixture" hidden><select id="fixture"></select></label>
-      </span>
-    </header>
-    <div class="formula" id="formula"></div>
-    <div id="zoom-popover" class="zoom-popover" hidden>
-      <label class="zoom-field"><input id="zoom-number" type="number" min="10" max="400" step="1" value="100" aria-label="zoom percent" />%</label>
-    </div>
-    <div id="canvas" class="canvas">
-      <div id="stage" class="stage">
-        <div id="panes" class="panes"></div>
-        <svg id="cross" class="wires cross-wires" aria-hidden="true"></svg>
-      </div>
-    </div>
     <script type="module" nonce="${nonce}" src="${script}"></script>
   </body>
 </html>`;
