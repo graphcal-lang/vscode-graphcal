@@ -151,10 +151,25 @@ export class GraphcalView {
 
   /** Ask the server for a document's model and hand it to the view with its sources. */
   private async push(uri: vscode.Uri, main: boolean): Promise<void> {
-    if (!this.panel || !this.client) return;
-    const model = await this.client.sendRequest<ViewModel | null>(VIEW_MODEL_REQUEST, {
-      textDocument: { uri: uri.toString() },
-    });
+    if (!this.panel) return;
+    if (!this.client) {
+      this.post({ type: "note", message: "the Graphcal language server is not running" });
+      return;
+    }
+    let model: ViewModel | null;
+    try {
+      model = await this.client.sendRequest<ViewModel | null>(VIEW_MODEL_REQUEST, {
+        textDocument: { uri: uri.toString() },
+      });
+    } catch (error) {
+      // An older graphcal has no graphcal/viewModel; say so instead of staying at "loading…".
+      const why = error instanceof Error ? error.message : String(error);
+      this.post({
+        type: "note",
+        message: `the language server could not provide the view (${why}); is graphcal up to date?`,
+      });
+      return;
+    }
     if (model === null) {
       if (main)
         this.post({ type: "note", message: "not analyzed yet, or the file does not compile" });
