@@ -11,6 +11,19 @@
    dependencies such as `vscode-languageclient` are included in
    `out/extension.js`; `node_modules` is intentionally not shipped in the VSIX.
 
+   Then build the Graphcal view's webview bundle from a `graphcal` checkout
+   next to this repository (`../graphcal`, with the `web/view` dependencies
+   installed):
+
+   ```sh
+   just view-bundle
+   ```
+
+   It writes `media/view/`, which Git does not track, and records the
+   `graphcal` commit it was built from in `media/view/SOURCE`. `just package`
+   and `just publish-direct` refuse to run without it, and `just publish`
+   refuses a VSIX without it.
+
 2. Make sure the `publisher` field in `package.json` matches the Visual Studio Marketplace publisher account.
 
 3. Check the versioning constraint for VS Code Marketplace pre-releases.
@@ -55,7 +68,7 @@
    just inspect
    ```
 
-   The VSIX should include `out/extension.js` and should not include
+   The VSIX should include `out/extension.js` and `media/view/` and should not include
    `node_modules` or `src`.
 
 8. Publish the packaged VSIX as a pre-release:

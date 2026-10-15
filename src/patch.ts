@@ -19,57 +19,83 @@ export interface FilePatch {
 
 const HUNK_HEAD = /^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/;
 
-/** Every file's hunks in a unified diff; text before the first `diff --git` or `---` is ignored. */
-export function parsePatch(text: string): FilePatch[] {
+/** The files of a patch, or why the text is not a patch that can be applied as it is. */
+export type ParsedPatch = { ok: true; files: FilePatch[] } | { ok: false; error: string };
+
+/**
+ * Every file's hunks in a unified diff; text before the first `diff --git` or
+ * `---` is ignored. A hunk holds exactly the lines its header counts: one cut
+ * short (a copy that lost its end) or overrunning is an error, never a
+ * partial edit.
+ */
+export function parsePatch(text: string): ParsedPatch {
   const lines = text.split(/\r?\n/);
+  // The newline ending the last line does not start another one.
+  if (lines[lines.length - 1] === "") lines.pop();
   const files: FilePatch[] = [];
   let current: FilePatch | null = null;
   let hunk: Hunk | null = null;
-  /** How many old and new lines the current hunk's header promised. */
-  let expected = { old: 0, new: 0 };
-  for (const line of lines) {
-    const head = /^\+\+\+ (?:b\/)?(.+)$/.exec(line);
-    if (head && current !== null && current.hunks.length === 0 && current.path === "") {
-      current.path = head[1] ?? "";
+  /** The 1-based line of the open hunk's header, for errors. */
+  let headLine = 0;
+  /** How many old and new lines the open hunk still needs. */
+  let missing = { old: 0, new: 0 };
+  for (const [index, line] of lines.entries()) {
+    if (hunk !== null) {
+      // Inside a hunk its header's counts decide what a line is: removing a
+      // line `-- x` reads `--- x`, which is not the next file's header.
+      if (line.startsWith("\\")) continue; // "\ No newline at end of file"
+      const mark = line === "" ? " " : line[0];
+      const body = line.slice(1);
+      if (mark === " " && missing.old > 0 && missing.new > 0) {
+        hunk.oldLines.push(body);
+        hunk.newLines.push(body);
+        missing = { old: missing.old - 1, new: missing.new - 1 };
+      } else if (mark === "-" && missing.old > 0) {
+        hunk.oldLines.push(body);
+        missing = { ...missing, old: missing.old - 1 };
+      } else if (mark === "+" && missing.new > 0) {
+        hunk.newLines.push(body);
+        missing = { ...missing, new: missing.new - 1 };
+      } else {
+        return {
+          ok: false,
+          error: `line ${index + 1} does not fit the hunk that line ${headLine} announces`,
+        };
+      }
+      if (missing.old === 0 && missing.new === 0) hunk = null;
+      continue;
+    }
+    if (line.startsWith("diff --git ")) {
+      current = null;
       continue;
     }
     if (line.startsWith("--- ")) {
       current = { path: "", hunks: [] };
       files.push(current);
-      hunk = null;
       continue;
     }
-    if (line.startsWith("diff --git ")) {
-      current = null;
-      hunk = null;
+    const head = /^\+\+\+ (?:b\/)?(.+)$/.exec(line);
+    if (head && current !== null && current.path === "" && current.hunks.length === 0) {
+      current.path = head[1] ?? "";
       continue;
     }
     const at = HUNK_HEAD.exec(line);
-    if (at && current !== null) {
+    if (at) {
+      if (current === null || current.path === "") {
+        return { ok: false, error: `the hunk at line ${index + 1} has no file header before it` };
+      }
       hunk = { oldStart: Number(at[1]), oldLines: [], newLines: [] };
-      expected = { old: Number(at[2] ?? "1"), new: Number(at[4] ?? "1") };
       current.hunks.push(hunk);
-      continue;
+      headLine = index + 1;
+      missing = { old: Number(at[2] ?? "1"), new: Number(at[4] ?? "1") };
+      if (missing.old === 0 && missing.new === 0) hunk = null;
     }
-    if (hunk === null) continue;
-    if (line.startsWith("\\")) continue; // "\ No newline at end of file"
-    const mark = line[0];
-    const body = line.slice(1);
-    if (mark === " " || line === "") {
-      hunk.oldLines.push(body);
-      hunk.newLines.push(body);
-    } else if (mark === "-") {
-      hunk.oldLines.push(body);
-    } else if (mark === "+") {
-      hunk.newLines.push(body);
-    } else {
-      hunk = null;
-      continue;
-    }
-    // The header said how long the hunk is; what follows is not part of it.
-    if (hunk.oldLines.length >= expected.old && hunk.newLines.length >= expected.new) hunk = null;
+    // Anything else between hunks (a heading, `index …`) is not the patch's.
   }
-  return files.filter((f) => f.path !== "" && f.hunks.length > 0);
+  if (hunk !== null) {
+    return { ok: false, error: `the hunk at line ${headLine} is cut off` };
+  }
+  return { ok: true, files: files.filter((f) => f.path !== "" && f.hunks.length > 0) };
 }
 
 /** A replacement of lines `[start, end)` (0-based) of the original text. */
