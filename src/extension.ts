@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 import { LanguageClient, LanguageClientOptions, ServerOptions } from "vscode-languageclient/node";
+import { applyChangesFromClipboard } from "./applyChanges";
+import { GraphcalView, viewModelFeature } from "./view";
 import {
   findEnclosingTable,
   findNextCell,
@@ -10,6 +12,7 @@ import {
 let client: LanguageClient | undefined;
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
+  const view = new GraphcalView(context);
   context.subscriptions.push(
     vscode.commands.registerCommand("graphcal.restartServer", async () => {
       if (!client) {
@@ -21,6 +24,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         await client.start();
       }
     }),
+    vscode.commands.registerCommand("graphcal.openView", () => view.open()),
+    vscode.commands.registerCommand("graphcal.applyChangesFromClipboard", () =>
+      applyChangesFromClipboard(),
+    ),
+    vscode.window.onDidChangeActiveTextEditor((editor) => view.follow(editor)),
   );
 
   // Table cell navigation commands
@@ -52,7 +60,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
   client = createLanguageClient(config);
   if (client) {
+    client.registerFeature(viewModelFeature());
     await client.start();
+    view.attach(client);
   }
 }
 
