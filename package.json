@@ -26,6 +26,7 @@
     "vscode-languageclient": "^10.0.0"
   },
   "devDependencies": {
+    "@types/node": "24.19.2",
     "@types/vscode": "1.140.0",
     "@vscode/vsce": "4.0.0",
     "vite": "catalog:",
@@ -68,7 +69,7 @@
         "graphcal.lsp.path": {
           "type": "string",
           "default": "",
-          "description": "Path to the graphcal executable. If empty, the extension will look for 'graphcal' on PATH. ${workspaceFolder} expands to the first workspace folder and ${workspaceFolder:name} to the folder of that name."
+          "description": "Path to the graphcal executable. If empty, the extension will look for 'graphcal' on PATH. Supports ${workspaceFolder} (the first workspace folder), ${workspaceFolder:name}, ${userHome}, ${env:NAME} and ${pathSeparator} (or ${/})."
         }
       }
     },

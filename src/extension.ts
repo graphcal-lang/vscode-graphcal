@@ -1,3 +1,5 @@
+import * as os from "node:os";
+import * as nodePath from "node:path";
 import * as vscode from "vscode";
 import { LanguageClient, LanguageClientOptions, ServerOptions } from "vscode-languageclient/node";
 import { applyChangesFromClipboard } from "./applyChanges";
@@ -106,7 +108,12 @@ function createLanguageClient(config: vscode.WorkspaceConfiguration): LanguageCl
     name: f.name,
     fsPath: f.uri.fsPath,
   }));
-  const path = serverPath(config.get<string>("path", ""), folders);
+  const path = serverPath(config.get<string>("path", ""), {
+    folders,
+    userHome: os.homedir(),
+    env: process.env,
+    pathSeparator: nodePath.sep,
+  });
   if (!path.ok) {
     void vscode.window.showErrorMessage(
       `Graphcal: cannot start the language server from graphcal.lsp.path (${path.error}).`,
