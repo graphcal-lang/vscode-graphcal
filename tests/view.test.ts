@@ -122,7 +122,9 @@ test("an edit made on A's sheet goes to A's file while B loads, never to B's", a
   await settle();
   expect(state.files.get("/work/a/src/main.gcl")).toBe("param n = 2;\n");
   expect(state.files.get("/work/b/src/main.gcl")).toBe("param n = 1;\n");
-  expect(posted("edited")).toEqual([{ type: "edited", id: 1, ok: true }]);
+  expect(posted("edited")).toEqual([
+    { type: "edited", id: 1, ok: true, revision: expect.any(Number) },
+  ]);
 });
 
 test("offsets on a copy the editor has changed since are refused, and the copy is resent", async () => {
@@ -152,20 +154,40 @@ test("an edit on a copy older than the latest sent is refused", async () => {
   expect(posted("edited")).toMatchObject([{ id: 2, ok: false }]);
 });
 
-test("two edits in a row land in order even when the first is slower", async () => {
+test("an applied edit makes a new revision, which the next edit names", async () => {
   server.answerAtOnce.set(A, model("a"));
   await openOn(A);
   const [sent] = posted("model");
-  state.openDelays = [30, 0];
+  state.openDelays = [30];
   receive(editOn(sent!, 1, { start: 10, end: 11, text: "2" }));
-  // The second edit is on the webview's copy after the first: "param n = 2;\n".
-  receive(editOn(sent!, 2, { start: 12, end: 12, text: " // two" }));
   await new Promise((resolve) => setTimeout(resolve, 60));
   await settle();
+  const [first] = posted("edited");
+  expect(first).toMatchObject({ id: 1, ok: true });
+  expect(first?.revision).toBeGreaterThan(sent!.revision);
+  // The second edit is on the copy the first left: "param n = 2;\n".
+  receive({
+    ...editOn(sent!, 2, { start: 12, end: 12, text: " // two" }),
+    revision: first?.revision,
+  });
+  await settle();
   expect(state.files.get("/work/a/src/main.gcl")).toBe("param n = 2; // two\n");
-  expect(posted("edited")).toEqual([
-    { type: "edited", id: 1, ok: true },
-    { type: "edited", id: 2, ok: true },
+  expect(posted("edited")[1]).toMatchObject({ id: 2, ok: true });
+  expect(posted("edited")[1]?.revision).toBeGreaterThan(first?.revision);
+});
+
+test("an edit on the revision before an applied edit is refused", async () => {
+  server.answerAtOnce.set(A, model("a"));
+  await openOn(A);
+  const [sent] = posted("model");
+  receive(editOn(sent!, 1, { start: 10, end: 11, text: "2" }));
+  await settle();
+  receive(editOn(sent!, 2, { start: 10, end: 11, text: "3" }));
+  await settle();
+  expect(state.files.get("/work/a/src/main.gcl")).toBe("param n = 2;\n");
+  expect(posted("edited")).toMatchObject([
+    { id: 1, ok: true },
+    { id: 2, ok: false },
   ]);
 });
 

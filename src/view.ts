@@ -4,11 +4,12 @@
 // view model, re-asks whenever the server announces a fresh analysis, and
 // turns the view's edits into edits of the editor's documents.
 //
-// The webview edits its copy of a file and sends the change as offsets on
-// that copy. Every copy goes out with its project and a revision; an edit
-// goes to the document that copy was read from, and only while the copy is
-// the latest sent and the document still reads the same (see viewSync.ts).
-// Whatever sends copies or edits a document runs one task at a time.
+// The webview sends a change as offsets on its copy of a file. Every copy
+// goes out with its project and a revision; an edit goes to the document that
+// copy was read from, and only while the copy is the latest and the document
+// still reads the same (see viewSync.ts). An applied edit makes a new
+// revision of the copy, which the answer names: the webview's next edit is on
+// it. Whatever sends copies or edits a document runs one task at a time.
 import * as vscode from "vscode";
 import type { LanguageClient, StaticFeature } from "vscode-languageclient/node";
 import {
@@ -35,7 +36,8 @@ type ToView =
       revision: number;
       main: boolean;
     }
-  | { type: "edited"; id: number; ok: true }
+  /** Applied: the edited copy is now at `revision`. */
+  | { type: "edited"; id: number; ok: true; revision: number }
   | { type: "edited"; id: number; ok: false; message: string }
   | { type: "note"; message: string | null };
 
@@ -324,7 +326,8 @@ export class GraphcalView {
   /**
    * Replace a span of the file the webview's copy was read from, if that copy
    * is still the document's text; the server then re-analyzes. The webview
-   * waits for the `edited` answer before it takes the edit into its copy.
+   * waits for the `edited` answer before it takes the edit into its copy, at
+   * the revision the answer names.
    */
   private async applyEdit(session: Session, edit: EditMessage): Promise<void> {
     const refuse = (message: string, resync: boolean): void => {
@@ -358,11 +361,12 @@ export class GraphcalView {
       refuse(`could not edit ${edit.file}`, true);
       return;
     }
-    // The webview's copy is now the edited text. Should the document read
-    // otherwise (it normalized line endings, say), the next edit's check
-    // finds the difference and refreshes the copy.
+    // The webview's copy is now the edited text, at a revision of its own.
+    // Should the document read otherwise (it normalized line endings, say),
+    // the next edit's check finds the difference and refreshes the copy.
     held.text = check.next;
-    session.post({ type: "edited", id: edit.id, ok: true });
+    held.revision = session.nextRevision();
+    session.post({ type: "edited", id: edit.id, ok: true, revision: held.revision });
   }
 
   /** Open a module's file so the server analyzes it; its model follows the server's announcement. */
