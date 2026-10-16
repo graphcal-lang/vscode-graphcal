@@ -68,7 +68,7 @@
         "graphcal.lsp.path": {
           "type": "string",
           "default": "",
-          "description": "Path to the graphcal executable. If empty, the extension will look for 'graphcal' on PATH."
+          "description": "Path to the graphcal executable. If empty, the extension will look for 'graphcal' on PATH. ${workspaceFolder} expands to the first workspace folder and ${workspaceFolder:name} to the folder of that name."
         }
       }
     },

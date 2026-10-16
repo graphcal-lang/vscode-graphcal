@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { LanguageClient, LanguageClientOptions, ServerOptions } from "vscode-languageclient/node";
 import { applyChangesFromClipboard } from "./applyChanges";
+import { serverPath } from "./serverPath";
 import { GraphcalView, viewModelFeature } from "./view";
 import {
   findEnclosingTable,
@@ -101,10 +102,20 @@ export async function deactivate(): Promise<void> {
 }
 
 function createLanguageClient(config: vscode.WorkspaceConfiguration): LanguageClient | undefined {
-  const command = resolveGraphcalPath(config);
+  const folders = (vscode.workspace.workspaceFolders ?? []).map((f) => ({
+    name: f.name,
+    fsPath: f.uri.fsPath,
+  }));
+  const path = serverPath(config.get<string>("path", ""), folders);
+  if (!path.ok) {
+    void vscode.window.showErrorMessage(
+      `Graphcal: cannot start the language server from graphcal.lsp.path (${path.error}).`,
+    );
+    return undefined;
+  }
 
   const serverOptions: ServerOptions = {
-    command,
+    command: path.command,
     args: ["lsp"],
   };
 
@@ -118,12 +129,4 @@ function createLanguageClient(config: vscode.WorkspaceConfiguration): LanguageCl
     serverOptions,
     clientOptions,
   );
-}
-
-function resolveGraphcalPath(config: vscode.WorkspaceConfiguration): string {
-  const configured = config.get<string>("path", "");
-  if (configured) {
-    return configured;
-  }
-  return "graphcal";
 }
