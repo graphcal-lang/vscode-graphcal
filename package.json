@@ -115,7 +115,7 @@
       "editor/title": [
         {
           "command": "graphcal.openView",
-          "when": "editorLangId == graphcal",
+          "when": "editorLangId == 'graphcal' && resourceScheme == file",
           "group": "navigation"
         }
       ]

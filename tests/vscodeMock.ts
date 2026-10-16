@@ -7,7 +7,10 @@ export const state = {
   files: new Map<string, string>(),
   folders: [] as string[],
   clipboard: "",
-  active: null as unknown,
+  active: undefined as unknown,
+  visible: [] as unknown[],
+  /** The columns passed to the panel's `reveal`, in order. */
+  reveals: [] as unknown[],
   /** Messages posted to the webview, and the messages the extension showed. */
   posted: [] as { type: string; [key: string]: unknown }[],
   /** The webview's message listener, once a panel exists. */
@@ -20,7 +23,9 @@ export function reset(): void {
   state.files.clear();
   state.folders = [];
   state.clipboard = "";
-  state.active = null;
+  state.active = undefined;
+  state.visible = [];
+  state.reveals = [];
   state.posted = [];
   state.receive = null;
   state.openDelays = [];
@@ -142,6 +147,9 @@ export const vscode = {
     get activeTextEditor() {
       return state.active;
     },
+    get visibleTextEditors() {
+      return state.visible;
+    },
     showErrorMessage: async (message: string) => {
       state.posted.push({ type: "error", message });
     },
@@ -153,7 +161,9 @@ export const vscode = {
     },
     showTextDocument: async () => undefined,
     createWebviewPanel: () => ({
-      reveal() {},
+      reveal(column?: unknown) {
+        state.reveals.push(column);
+      },
       onDidDispose() {},
       webview: {
         html: "",
