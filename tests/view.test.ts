@@ -209,3 +209,18 @@ test("without the view bundle, Open View says so and opens no panel", async () =
   expect(state.receive).toBeNull();
   expect(state.posted).toMatchObject([{ type: "error" }]);
 });
+
+test("with no active .gcl editor, Open View shows a visible one", async () => {
+  server.answerAtOnce.set(B, model("b"));
+  state.visible = [editor("untitled:Untitled-1"), editor(B)];
+  await view().view.open();
+  receive({ type: "ready" });
+  await settle();
+  expect(server.requests).toEqual([B]);
+});
+
+test("Open View brings an open panel to the front where it is", async () => {
+  const v = await openOn(A);
+  await v.view.open();
+  expect(state.reveals).toEqual([undefined]);
+});

@@ -170,13 +170,16 @@ export class GraphcalView {
     );
   }
 
-  /** Open the panel beside the editor for the active `.gcl` file. */
+  /** Open the panel beside the editor for the active `.gcl` file, or else a visible one. */
   async open(): Promise<void> {
-    const editor = vscode.window.activeTextEditor;
-    if (editor && viewable(editor.document)) this.main = editor.document.uri;
+    const editor = [vscode.window.activeTextEditor, ...vscode.window.visibleTextEditors].find(
+      (candidate) => candidate !== undefined && viewable(candidate.document),
+    );
+    if (editor) this.main = editor.document.uri;
     const existing = this.session;
     if (existing) {
-      existing.panel.reveal(vscode.ViewColumn.Beside, true);
+      // Front in its own column: `Beside` is relative to the active editor and would move it.
+      existing.panel.reveal(undefined, true);
       if (existing.ready) this.showMain(existing);
       return;
     }
