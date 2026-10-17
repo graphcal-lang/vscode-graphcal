@@ -11,6 +11,8 @@ const B = "file:///work/b/src/main.gcl";
 /** The server: answers the uris in `answerAtOnce`, and holds every other answer for the test to give. */
 const server = {
   requests: [] as string[],
+  /** The `target` of each request, in order. */
+  targets: [] as unknown[],
   held: new Map<string, ((model: unknown) => void)[]>(),
   answerAtOnce: new Map<string, unknown>(),
 };
@@ -18,6 +20,7 @@ const server = {
 beforeEach(() => {
   reset();
   server.requests = [];
+  server.targets = [];
   server.held.clear();
   server.answerAtOnce.clear();
   state.files.set("/ext/media/view/view.js", "");
@@ -44,9 +47,10 @@ function view() {
       announce = handler;
       return { dispose() {} };
     },
-    sendRequest: (_: string, params: { textDocument: { uri: string } }) => {
+    sendRequest: (_: string, params: { textDocument: { uri: string }; target: unknown }) => {
       const uri = params.textDocument.uri;
       server.requests.push(uri);
+      server.targets.push(params.target);
       if (server.answerAtOnce.has(uri)) return Promise.resolve(server.answerAtOnce.get(uri));
       return new Promise((resolve) =>
         server.held.set(uri, [...(server.held.get(uri) ?? []), resolve]),
@@ -245,4 +249,24 @@ test("Open View brings an open panel to the front where it is", async () => {
   const v = await openOn(A);
   await v.view.open();
   expect(state.reveals).toEqual([undefined]);
+});
+
+test("an include instance is asked of its root's document, and again on each analysis", async () => {
+  // The root module `a.main` is `src/a/main.gcl` of the project.
+  const root = "file:///work/a/src/a/main.gcl";
+  state.files.set("/work/a/src/a/main.gcl", "include a.lib(gain: 2.0) as p;\n");
+  server.answerAtOnce.set(root, model("a"));
+  const v = await openOn(root);
+  receive({ type: "request", target: { kind: "instance", root: "a.main", instance: "i:p" } });
+  await settle();
+  expect(server.requests).toEqual([root, root]);
+  expect(server.targets).toEqual([{ kind: "module" }, { kind: "instance", instance: "i:p" }]);
+  v.announce(root);
+  await settle();
+  expect(server.targets.slice(2)).toEqual([
+    { kind: "module" },
+    { kind: "instance", instance: "i:p" },
+  ]);
+  // Both answers reach the view: the main sheet's and the instance's.
+  expect(posted("model").map((m) => m.main)).toEqual([true, false, true, false]);
 });

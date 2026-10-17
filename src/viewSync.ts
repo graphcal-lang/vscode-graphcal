@@ -20,7 +20,49 @@ export type FromView =
       end: number;
       text: string;
     }
-  | { type: "request"; module: string };
+  /** The model of a target the view has none of yet. */
+  | { type: "request"; target: ViewTarget };
+
+/**
+ * What the view shows: a module alone, or one include instance (an opaque id)
+ * of the module `root`, as the language server projects it from `root`'s
+ * analysis.
+ */
+export type ViewTarget =
+  | { kind: "module"; module: string }
+  | { kind: "instance"; root: string; instance: string };
+
+/** The `target` of a `graphcal/viewModel` request on the target's root document. */
+export type ServerTarget = { kind: "module" } | { kind: "instance"; instance: string };
+
+/** The module whose document the server projects `target` from. */
+export function rootModule(target: ViewTarget): string {
+  return target.kind === "module" ? target.module : target.root;
+}
+
+/** The request `target` of `target`, on its root module's document. */
+export function serverTarget(target: ViewTarget): ServerTarget {
+  return target.kind === "module"
+    ? { kind: "module" }
+    : { kind: "instance", instance: target.instance };
+}
+
+/** The key of a target asked of one document: a document may be asked for several. */
+export function wantedKey(uri: string, target: ServerTarget): string {
+  return JSON.stringify(target.kind === "module" ? [uri] : [uri, target.instance]);
+}
+
+function parseTarget(raw: unknown): ViewTarget | null {
+  if (typeof raw !== "object" || raw === null) return null;
+  const t = raw as Record<string, unknown>;
+  if (t.kind === "module" && typeof t.module === "string") {
+    return { kind: "module", module: t.module };
+  }
+  if (t.kind === "instance" && typeof t.root === "string" && typeof t.instance === "string") {
+    return { kind: "instance", root: t.root, instance: t.instance };
+  }
+  return null;
+}
 
 export type EditMessage = Extract<FromView, { type: "edit" }>;
 
@@ -35,8 +77,10 @@ export function parseFromView(message: unknown): FromView | null {
   switch (m.type) {
     case "ready":
       return { type: "ready" };
-    case "request":
-      return typeof m.module === "string" ? { type: "request", module: m.module } : null;
+    case "request": {
+      const target = parseTarget(m.target);
+      return target === null ? null : { type: "request", target };
+    }
     case "edit": {
       const { id, project, file, revision, start, end, text } = m;
       if (

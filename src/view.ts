@@ -17,8 +17,13 @@ import {
   heldKey,
   isModulePath,
   parseFromView,
+  rootModule,
+  serverTarget,
+  wantedKey,
   type EditMessage,
   type Held,
+  type ServerTarget,
+  type ViewTarget,
 } from "./viewSync";
 
 const VIEW_MODEL_REQUEST = "graphcal/viewModel";
@@ -109,13 +114,13 @@ function messageOf(error: unknown): string {
 class Session {
   /** The files the webview holds, by `heldKey`. */
   readonly held = new Map<string, Held<vscode.Uri>>();
-  /** Documents whose models the view asked for, by uri string. */
-  readonly wanted = new Set<string>();
+  /** The targets the view asked for, each of a document, by `wantedKey`. */
+  readonly wanted = new Map<string, { uri: string; target: ServerTarget }>();
   ready = false;
   disposed = false;
   private revisions = 0;
   private pushes = 0;
-  /** The newest push to each target ("main" or a uri): an older answer must not overwrite it. */
+  /** The newest push to each sheet ("main" or a `wantedKey`): an older answer must not overwrite it. */
   private readonly latest = new Map<string, number>();
   private queue: Promise<void> = Promise.resolve();
 
@@ -167,7 +172,10 @@ export class GraphcalView {
         if (!session) return;
         const uri = vscode.Uri.parse(params.uri);
         if (this.main?.toString() === uri.toString()) void this.push(session, uri, true);
-        else if (session.wanted.has(uri.toString())) void this.push(session, uri, false);
+        // Its include instances too, and its own model when it is not the main sheet.
+        for (const wanted of session.wanted.values()) {
+          if (wanted.uri === uri.toString()) void this.push(session, uri, false, wanted.target);
+        }
       }),
     );
   }
@@ -252,16 +260,24 @@ export class GraphcalView {
         });
         return;
       case "request":
-        void this.request(session, message.module);
+        void this.request(session, message.target);
         return;
       default:
         return;
     }
   }
 
-  /** Ask the server for a document's model and hand it to the view with its sources. */
-  private async push(session: Session, uri: vscode.Uri, main: boolean): Promise<void> {
-    const target = main ? "main" : uri.toString();
+  /**
+   * Ask the server for a model of a document (its own, or one include
+   * instance of its evaluation) and hand it to the view with its sources.
+   */
+  private async push(
+    session: Session,
+    uri: vscode.Uri,
+    main: boolean,
+    of: ServerTarget = { kind: "module" },
+  ): Promise<void> {
+    const target = main ? "main" : wantedKey(uri.toString(), of);
     const ticket = session.issue(target);
     if (!this.client) {
       session.post({ type: "note", message: "the Graphcal language server is not running" });
@@ -271,6 +287,7 @@ export class GraphcalView {
     try {
       model = await this.client.sendRequest<ViewModel | null>(VIEW_MODEL_REQUEST, {
         textDocument: { uri: uri.toString() },
+        target: of,
       });
     } catch (error) {
       if (!session.isCurrent(target, ticket)) return;
@@ -320,7 +337,9 @@ export class GraphcalView {
   /** Send the webview fresh copies of what it shows. */
   private resync(session: Session): void {
     if (this.main) void this.push(session, this.main, true);
-    for (const uri of session.wanted) void this.push(session, vscode.Uri.parse(uri), false);
+    for (const { uri, target } of session.wanted.values()) {
+      void this.push(session, vscode.Uri.parse(uri), false, target);
+    }
   }
 
   /**
@@ -369,18 +388,24 @@ export class GraphcalView {
     session.post({ type: "edited", id: edit.id, ok: true, revision: held.revision });
   }
 
-  /** Open a module's file so the server analyzes it; its model follows the server's announcement. */
-  private async request(session: Session, module: string): Promise<void> {
+  /**
+   * Open the file of the target's module (an instance's root) so the server
+   * analyzes it; the model follows, and again on each of its analyses.
+   */
+  private async request(session: Session, requested: ViewTarget): Promise<void> {
+    const module = rootModule(requested);
     if (!this.main || !isModulePath(module)) return;
     const uri = fileOfModule(await projectRootOf(this.main), module);
-    session.wanted.add(uri.toString());
+    const target = serverTarget(requested);
+    const key = wantedKey(uri.toString(), target);
+    session.wanted.set(key, { uri: uri.toString(), target });
     try {
       await vscode.workspace.openTextDocument(uri);
     } catch {
-      session.wanted.delete(uri.toString());
+      session.wanted.delete(key);
       return;
     }
-    await this.push(session, uri, false);
+    await this.push(session, uri, false, target);
   }
 
   /** The page: the bundle brings the view's markup with it, so the body holds only the script. */

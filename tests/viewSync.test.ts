@@ -15,9 +15,15 @@ const edit = {
 describe("parseFromView", () => {
   test("reads the messages the webview sends", () => {
     expect(parseFromView({ type: "ready" })).toEqual({ type: "ready" });
-    expect(parseFromView({ type: "request", module: "a.b" })).toEqual({
+    const module = { kind: "module", module: "a.b" };
+    expect(parseFromView({ type: "request", target: module })).toEqual({
       type: "request",
-      module: "a.b",
+      target: module,
+    });
+    const instance = { kind: "instance", root: "a.main", instance: "p:a/s:p" };
+    expect(parseFromView({ type: "request", target: instance })).toEqual({
+      type: "request",
+      target: instance,
     });
     expect(parseFromView(edit)).toEqual(edit);
   });
@@ -30,7 +36,12 @@ describe("parseFromView", () => {
     ["a negative offset", { ...edit, start: -1 }],
     ["a fractional offset", { ...edit, end: 1.5 }],
     ["text that is no string", { ...edit, text: 2 }],
-    ["a request without a module", { type: "request" }],
+    ["a request without a target", { type: "request" }],
+    ["a request by module id alone", { type: "request", module: "a.b" }],
+    [
+      "an instance without its root",
+      { type: "request", target: { kind: "instance", instance: "i" } },
+    ],
   ])("refuses %s", (_, message) => {
     expect(parseFromView(message)).toBeNull();
   });
