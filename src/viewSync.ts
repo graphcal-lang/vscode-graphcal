@@ -14,7 +14,7 @@ export type FromView =
       project: string;
       /** The file, relative to the project root. */
       file: string;
-      /** The revision of the copy the offsets are on. */
+      /** The revision of the copy the offsets are on: the copy as last sent, or as the last applied edit left it. */
       revision: number;
       start: number;
       end: number;
