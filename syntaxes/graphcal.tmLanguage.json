@@ -31,7 +31,7 @@
     { "include": "#import-declaration" },
     { "include": "#for-binding" },
     { "include": "#table-index-list" },
-    { "include": "#todo-definition" },
+    { "include": "#todo-hole" },
     { "include": "#as-keyword" },
     { "include": "#control-keywords" },
     { "include": "#generic-params" },
@@ -200,12 +200,11 @@
       }
     },
 
-    "todo-definition": {
-      "comment": "Contextual node-definition marker, never an ordinary call or graph reference.",
-      "match": "(?<![=!<>])(=)\\s*(todo)\\b(?=\\s*\\{)",
+    "todo-hole": {
+      "comment": "Contextual typed-hole marker `todo<T> {`, never an ordinary name, call, or graph reference.",
+      "match": "(?<![@.:\\w])(todo)(?=\\s*<(?:[^<>;{}()]|<[^<>;{}()]*>)*>\\s*\\{)",
       "captures": {
-        "1": { "name": "keyword.operator.graphcal" },
-        "2": { "name": "keyword.other.todo.graphcal" }
+        "1": { "name": "keyword.other.todo.graphcal" }
       }
     },
 
