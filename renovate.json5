@@ -1,10 +1,6 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: [
-    "github>graphcal-lang/renovate-config",
-    // Until this repo adopts .github/workflows/actions.lock
-    "helpers:pinGitHubActionDigestsToSemver",
-  ],
+  extends: ["github>graphcal-lang/renovate-config"],
   packageRules: [
     {
       description: "Update VS Code engine and @types/vscode together",
