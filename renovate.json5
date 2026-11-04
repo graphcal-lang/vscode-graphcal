@@ -1,15 +1,11 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["config:best-practices", "helpers:pinGitHubActionDigestsToSemver"],
-  minimumReleaseAge: "7 days",
-  lockFileMaintenance: {
-    enabled: true,
-  },
+  extends: [
+    "github>graphcal-lang/renovate-config",
+    // Until this repo adopts .github/workflows/actions.lock
+    "helpers:pinGitHubActionDigestsToSemver",
+  ],
   packageRules: [
-    {
-      matchUpdateTypes: ["lockFileMaintenance"],
-      minimumReleaseAge: null,
-    },
     {
       description: "Update VS Code engine and @types/vscode together",
       matchManagers: ["npm"],
@@ -18,7 +14,6 @@
       groupSlug: "vscode-api",
       rangeStrategy: "bump",
       minimumGroupSize: 2,
-      minimumReleaseAge: "7 days",
     },
   ],
 }
