@@ -7,6 +7,7 @@ workflows:
         - 'actions/checkout@v7.0.1'
     '.github/workflows/ci.yml':
         - 'actions/checkout@v7.0.1'
+        - 'j178/prek-action@v3.1.0'
         - 'voidzero-dev/setup-vp@v1.22.0'
 dependencies:
     'actions/checkout@v7.0.1':
@@ -14,6 +15,11 @@ dependencies:
         commit: 'sha1-3d3c42e5aac5ba805825da76410c181273ba90b1'
         owner_id: 44036562
         repo_id: 197814629
+    'j178/prek-action@v3.1.0':
+        ref: 'v3.1.0'
+        commit: 'sha1-44924fe9ef4a6f88253c4b6b1bf11c689d3ce53d'
+        owner_id: 10510431
+        repo_id: 1052387486
     'voidzero-dev/setup-vp@v1.22.0':
         ref: 'v1.22.0'
         commit: 'sha1-cab1ab9eaff52d4857875f4f2c016e36af8f2c76'
