@@ -500,6 +500,11 @@
         "2": { "name": "variable.other.graphcal" },
         "3": { "name": "punctuation.separator.colon.graphcal" }
       },
+      "patterns": [{ "include": "#marked-value-contents" }]
+    },
+
+    "marked-value-contents": {
+      "comment": "Value of a marked DAG input binding. Brackets and parentheses nest, so a `,` or `)` inside them never ends the value, e.g. `index I: Fin((3 + 1) * 2)`.",
       "patterns": [
         { "include": "#comments" },
         {
@@ -512,7 +517,29 @@
           "endCaptures": {
             "0": { "name": "punctuation.brackets.square.graphcal" }
           },
-          "patterns": [{ "include": "#generic-argument-contents" }]
+          "patterns": [{ "include": "#marked-value-contents" }]
+        },
+        {
+          "comment": "Parenthesized group: Fin(2 * (3 + 1)) or type constraints (min: 0, max: 1)",
+          "begin": "\\(",
+          "end": "\\)",
+          "beginCaptures": {
+            "0": { "name": "punctuation.brackets.round.graphcal" }
+          },
+          "endCaptures": {
+            "0": { "name": "punctuation.brackets.round.graphcal" }
+          },
+          "patterns": [
+            {
+              "comment": "Constraint key: min or max",
+              "match": "\\b(min|max)\\s*(:)",
+              "captures": {
+                "1": { "name": "entity.other.attribute-name.graphcal" },
+                "2": { "name": "punctuation.separator.colon.graphcal" }
+              }
+            },
+            { "include": "#marked-value-contents" }
+          ]
         },
         { "include": "#generic-argument-contents" }
       ]
