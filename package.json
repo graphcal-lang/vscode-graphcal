@@ -30,7 +30,9 @@
     "@types/vscode": "1.140.0",
     "@vscode/vsce": "4.1.0",
     "vite": "catalog:",
-    "vite-plus": "catalog:"
+    "vite-plus": "catalog:",
+    "vscode-oniguruma": "2.0.1",
+    "vscode-textmate": "9.3.2"
   },
   "contributes": {
     "languages": [

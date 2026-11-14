@@ -44,6 +44,7 @@
     { "include": "#key-former-keyword" },
     { "include": "#generic-call-application" },
     { "include": "#fn-call" },
+    { "include": "#inline-dag-call" },
     { "include": "#inline-dag-output-projection" },
     { "include": "#graph-ref" },
     { "include": "#qualified-const-ref" },
@@ -467,15 +468,9 @@
         "0": { "name": "punctuation.brackets.round.graphcal" }
       },
       "patterns": [
-        {
-          "comment": "Input binding: [type|dim|index] name: expr",
-          "match": "(?:\\b(type|dim|index)\\s+)?\\b([a-zA-Z][a-zA-Z0-9_]*)\\s*(:)",
-          "captures": {
-            "1": { "name": "keyword.declaration.input-category.graphcal" },
-            "2": { "name": "variable.other.graphcal" },
-            "3": { "name": "punctuation.separator.colon.graphcal" }
-          }
-        },
+        { "include": "#marked-param-binding" },
+        { "include": "#unmarked-param-binding-name" },
+        { "include": "#inline-dag-call" },
         { "include": "#graph-ref" },
         { "include": "#numbers" },
         { "include": "#booleans" },
@@ -488,8 +483,75 @@
         {
           "match": ",",
           "name": "punctuation.separator.comma.graphcal"
+        },
+        {
+          "comment": "A parenthesized group in a binding value, so its `)` does not close the binding list.",
+          "include": "#import-param-bindings"
         }
       ]
+    },
+
+    "marked-param-binding": {
+      "comment": "Marked DAG input binding: `type`/`dim`/`index` selects a type, dimension, or index expression as the value, e.g. `type T: Vec3<Length, Eci>`, `dim D: Length / Time`, `index I: Fin(3)`.",
+      "begin": "\\b(type|dim|index)\\s+([a-zA-Z][a-zA-Z0-9_]*)\\s*(:)",
+      "end": "(?=[,)])",
+      "beginCaptures": {
+        "1": { "name": "keyword.declaration.input-category.graphcal" },
+        "2": { "name": "variable.other.graphcal" },
+        "3": { "name": "punctuation.separator.colon.graphcal" }
+      },
+      "patterns": [{ "include": "#marked-value-contents" }]
+    },
+
+    "marked-value-contents": {
+      "comment": "Value of a marked DAG input binding. Brackets and parentheses nest, so a `,` or `)` inside them never ends the value, e.g. `index I: Fin((3 + 1) * 2)`.",
+      "patterns": [
+        { "include": "#comments" },
+        {
+          "comment": "Index list of an indexed type: Velocity[Phase, Mode]",
+          "begin": "\\[",
+          "end": "\\]",
+          "beginCaptures": {
+            "0": { "name": "punctuation.brackets.square.graphcal" }
+          },
+          "endCaptures": {
+            "0": { "name": "punctuation.brackets.square.graphcal" }
+          },
+          "patterns": [{ "include": "#marked-value-contents" }]
+        },
+        {
+          "comment": "Parenthesized group: Fin(2 * (3 + 1)) or type constraints (min: 0, max: 1)",
+          "begin": "\\(",
+          "end": "\\)",
+          "beginCaptures": {
+            "0": { "name": "punctuation.brackets.round.graphcal" }
+          },
+          "endCaptures": {
+            "0": { "name": "punctuation.brackets.round.graphcal" }
+          },
+          "patterns": [
+            {
+              "comment": "Constraint key: min or max",
+              "match": "\\b(min|max)\\s*(:)",
+              "captures": {
+                "1": { "name": "entity.other.attribute-name.graphcal" },
+                "2": { "name": "punctuation.separator.colon.graphcal" }
+              }
+            },
+            { "include": "#marked-value-contents" }
+          ]
+        },
+        { "include": "#generic-argument-contents" }
+      ]
+    },
+
+    "unmarked-param-binding-name": {
+      "comment": "Unmarked DAG input binding name: `name: expr` binds a param.",
+      "match": "\\b([a-zA-Z][a-zA-Z0-9_]*)\\s*(:)(?!:)",
+      "captures": {
+        "1": { "name": "variable.other.graphcal" },
+        "2": { "name": "punctuation.separator.colon.graphcal" }
+      }
     },
 
     "import-item-list": {
@@ -919,6 +981,41 @@
         "1": { "name": "punctuation.definition.variable.graphcal" },
         "2": { "name": "variable.other.graphcal" }
       }
+    },
+
+    "inline-dag-call": {
+      "comment": "Inline DAG invocation with its input bindings: `@dag(x: @a, type T: Vec3<Length, Eci>)::output` or `@module.dag(args)::output`.",
+      "begin": "(@)([a-zA-Z][a-zA-Z0-9_]*(?:\\s*\\.\\s*[a-zA-Z][a-zA-Z0-9_]*)*)\\s*(\\()",
+      "end": "(\\))(?:\\s*(::)\\s*([a-zA-Z][a-zA-Z0-9_]*))?",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.variable.graphcal" },
+        "2": { "name": "entity.name.function.graphcal" },
+        "3": { "name": "punctuation.brackets.round.graphcal" }
+      },
+      "endCaptures": {
+        "1": { "name": "punctuation.brackets.round.graphcal" },
+        "2": { "name": "punctuation.accessor.graphcal" },
+        "3": { "name": "variable.other.graphcal" }
+      },
+      "patterns": [
+        { "include": "#marked-param-binding" },
+        { "include": "#unmarked-param-binding-name" },
+        { "include": "#nested-parens" },
+        { "include": "$self" }
+      ]
+    },
+
+    "nested-parens": {
+      "comment": "A parenthesized group inside an inline DAG binding value, so its `)` does not close the invocation.",
+      "begin": "\\(",
+      "end": "\\)",
+      "beginCaptures": {
+        "0": { "name": "punctuation.brackets.round.graphcal" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.brackets.round.graphcal" }
+      },
+      "patterns": [{ "include": "#nested-parens" }, { "include": "$self" }]
     },
 
     "inline-dag-output-projection": {
