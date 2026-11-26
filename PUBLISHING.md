@@ -89,9 +89,12 @@
 ## Renewing the PAT
 
 > [!WARNING]
-> Azure DevOps retires global PATs on December 1, 2026, and the Marketplace
-> accepts only global PATs. After that date this procedure no longer works,
-> and publishing has to move to
+> Azure DevOps retires global PATs, the only kind the Marketplace accepts.
+> [Microsoft's announcement](https://devblogs.microsoft.com/devops/retirement-of-global-personal-access-tokens-in-azure-devops/)
+> postponed the date from December 1, 2026 to January 27, 2027, though the
+> VS Code publishing guide still gives December 1. Plan for the earlier date.
+> After the retirement this procedure no longer works, and publishing has to
+> move to
 > [Trusted Publishing](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#secure-automated-publishing-to-visual-studio-marketplace)
 > from GitHub Actions.
 
