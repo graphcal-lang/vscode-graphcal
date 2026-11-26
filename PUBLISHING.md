@@ -52,6 +52,9 @@
    just verify-pat
    ```
 
+   If it fails with "The Personal Access Token used has expired", create a new
+   PAT as described in [Renewing the PAT](#renewing-the-pat).
+
 6. Package the VSIX as a pre-release:
 
    ```sh
@@ -82,3 +85,48 @@
    ```sh
    just publish-direct
    ```
+
+## Renewing the PAT
+
+> [!WARNING]
+> Azure DevOps retires global PATs on December 1, 2026, and the Marketplace
+> accepts only global PATs. After that date this procedure no longer works,
+> and publishing has to move to
+> [Trusted Publishing](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#secure-automated-publishing-to-visual-studio-marketplace)
+> from GitHub Actions.
+
+Give the PAT the least access that still lets `vsce` publish:
+
+1. Sign in to <https://dev.azure.com> with the account that owns the
+   `Graphcal` Marketplace publisher.
+
+2. Open **User settings** (next to the profile image), then
+   **Personal access tokens**, then **New Token**.
+
+3. Fill in the form:
+   - **Name**: something that says what it is for, such as
+     `vsce publish Graphcal`.
+   - **Organization**: **All accessible organizations**. The Marketplace is
+     not part of any organization, so a token for a single organization fails
+     with 401 or 403.
+   - **Expiration**: **Custom defined**, set to the last day you plan to
+     publish with it. A short lifetime limits the damage if it leaks.
+   - **Scopes**: **Custom defined**. Select **Show all scopes**, then select
+     only **Marketplace → Manage**. This is the scope the VS Code
+     documentation requires for `vsce publish`. Leave every other scope
+     unselected.
+
+4. Select **Create** and copy the token. Azure DevOps shows it only once.
+
+5. Paste it into the existing PAT item in the `Graphcal` 1Password vault,
+   replacing the old value. `.env` stays unchanged because it refers to the
+   item, not to the token.
+
+6. Check the new token:
+
+   ```sh
+   just verify-pat
+   ```
+
+7. After publishing, revoke the token in **Personal access tokens** unless you
+   will publish again before it expires.
